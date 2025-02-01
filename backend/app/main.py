@@ -1,16 +1,20 @@
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables immediately
+
 from fastapi import FastAPI
 from app.api.endpoints import router
-from dotenv import load_dotenv
 import os
 import openai
 
-# Initialize the OpenAI client
-
 app = FastAPI(title="Query Optimizer API")
-load_dotenv()
+
+# Set the API key from the environment
 api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
+    raise Exception("OPENAI_API_KEY not set in environment variables!")
 openai.api_key = api_key
-# ✅ Ensure the API router is included
+
+# Include the API router with prefix "/api"
 app.include_router(router, prefix="/api")
 
 @app.get("/")
