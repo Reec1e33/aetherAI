@@ -74,26 +74,41 @@ def get_query_response(query: str) -> str:
         raise Exception(f"Unexpected error: {str(e)}")
 
 
-def calculate_time_saved(original_response: str, refined_response: str) -> int:
+def calculate_time_saved(original_response: str, refined_response: str) -> str:
     """
-    Calculates the time saved based on the response lengths.
-    Logic:
-      - If the refined response is at least 3 times the length of the original,
-        a baseline 20 seconds is saved.
-      - For every additional whole multiple beyond 3 times, add 10 seconds.
-      - Otherwise, 0 seconds are saved.
+    Calculates the time saved based on the response lengths and returns a formatted string.
+    Example outputs:
+      - "38 seconds" if under 60 seconds.
+      - "1 minute 38 seconds" if 60 seconds or more.
+    
+    Calculation:
+      - time_saved_seconds = (refined_length / original_length) * 20
     """
     original_length = len(original_response)
     refined_length = len(refined_response)
-
+    
     if original_length == 0:
-        return 0
+        return "0 seconds"
 
-    multiplier = refined_length / original_length
+    # Calculate total time saved in seconds
+    time_saved_seconds = (refined_length / original_length) * 20
+    time_saved_seconds = round(time_saved_seconds, 2)
 
-    if multiplier < 3:
-        return 0
-    else:
-        additional_units = math.floor(multiplier) - 3
-        return 20 + (additional_units * 10)
+    # Calculate minutes and seconds components
+    minutes = int(time_saved_seconds // 60)
+    seconds =int( time_saved_seconds - (minutes * 60))
+    
+    # If seconds is a whole number, cast it to int
+    if seconds.is_integer():
+        seconds = int(seconds)
+    
+    parts = []
+    if minutes > 0:
+        minute_unit = "minute" if minutes == 1 else "minutes"
+        parts.append(f"{minutes} {minute_unit}")
+    if seconds > 0 or minutes == 0:  # always show seconds if minutes is 0
+        second_unit = "second" if seconds == 1 else "seconds"
+        parts.append(f"{seconds} {second_unit}")
+    
+    return " ".join(parts)
 
