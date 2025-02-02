@@ -1,6 +1,8 @@
 # AetherAI Web App
 
-AetherAI is a web application designed to boost productivity by refining user queries using the OpenAI API. The app takes an initial query, enhances it for clarity and detail, and then displays a side-by-side comparison of the original and refined responses. A “time saved” metric is also computed based on the differences in response lengths—helping users quickly gauge improvements and efficiency gains.
+AetherAI is a web application designed to boost productivity by refining user queries through the OpenAI API. The app accepts an initial query, enriches it for clarity and detail, and then displays a side-by-side comparison of the original and enhanced responses. In addition, a “time saved” metric is computed to capture the overall efficiency gains achieved by the refinement process.
+Our research indicates that, on average, a ChatGPT query—including the time spent processing and reading the answer—takes roughly 20 seconds. To estimate the efficiency improvement, we compare the word counts of the original and refined responses. Instead of using raw response lengths or estimated reading times, the “time saved” is calculated by multiplying the ratio of the refined query’s word count to the original query’s word count by the baseline query duration (20 seconds). For example, if the refined response contains 1.5 times as many words as the original, the estimated time saved would be 1.5 × 20 = 30 seconds.
+This approach provides users with a clear, research-based metric that reflects improvements in query quality and overall processing efficiency.
 
 ## Table of Contents
 
