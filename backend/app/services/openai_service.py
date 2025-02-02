@@ -111,4 +111,3 @@ def calculate_time_saved(original_response: str, refined_response: str) -> str:
         parts.append(f"{seconds} {second_unit}")
     
     return " ".join(parts)
-
