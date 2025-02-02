@@ -13,9 +13,9 @@ final class AppScreensStateLoading extends AppScreensState {
 }
 
 final class AppScreensStateLoaded extends AppScreensState {
-  final String data;
+  final EfficientResponse response;
 
-  const AppScreensStateLoaded(this.data);
+  const AppScreensStateLoaded(this.response);
 }
 
 final class AppScreensStateError extends AppScreensState {
