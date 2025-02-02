@@ -17,6 +17,8 @@ def refine_query(user_query: str) -> str:
                         "Your goal is to make the query more detailed, specific, and informative, while keeping it focused on the original intent. "
                         "Expand the query with relevant details, keywords, and context to ensure a high-quality response. "
                         "Do NOT ask follow-up questions. Simply return a refined and more complete version of the original query."
+                        "only do line breaks, no markdown formatting in response including bolding and italics." 
+                        "give text in plaintext format"
                     )
                 },
                 {
@@ -52,6 +54,8 @@ def get_query_response(query: str) -> str:
                 {
                     "role": "system",
                     "content": "You are a knowledgeable and helpful assistant."
+                    "only do line breaks, no markdown formatting in response including bolding and italics."
+                    "give text in plaintext format"
                 },
                 {
                     "role": "user",
