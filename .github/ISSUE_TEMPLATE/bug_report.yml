@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a problem in AetherAI.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the report. Do not put API keys or other secrets in this form.
+        To report a security vulnerability, use [SECURITY.md](https://github.com/Reec1e33/aetherAI/blob/main/SECURITY.md), not this form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: Tell what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error output
+      description: Paste the relevant output. Remove secrets first.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Commit or release
+      description: Give the release tag, or the output of `git rev-parse --short HEAD`.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Give your OS, your Python version, and the model provider, if applicable.
