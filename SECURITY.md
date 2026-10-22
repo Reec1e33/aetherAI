@@ -1,14 +1,9 @@
-# Security policy
+# Security
 
-## Supported versions
+Please don't open a public issue for a vulnerability. Use GitHub's private reporting instead: go to the [Security tab](https://github.com/Reec1e33/aetherAI/security) and click **Report a vulnerability**.
 
-Only the latest commit on `main` gets security fixes.
+Include what's affected, how to reproduce it, and why it matters. Leave real API keys and personal data out of the report.
 
-## Report a vulnerability
+I'll try to reply within a week. Only the latest `main` is supported.
 
-> **Caution:** Do not open a public issue for a security vulnerability. Do not put real API keys or personal data in the report.
-1. Go to the [Security tab](https://github.com/Reec1e33/aetherAI/security) of this repository.
-2. Click **Report a vulnerability**.
-3. Give the affected file or endpoint, the steps to reproduce, and the possible impact.
-
-The report stays private between you and the maintainer. The maintainer will try to reply in 7 days. When a fix is available, the maintainer will publish a security advisory and give you credit, unless you ask for no credit.
+If the problem is in a provider or gateway rather than in this repo, report it to that project.

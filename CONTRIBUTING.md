@@ -1,82 +1,55 @@
-# Contribute to Aether census
+# Contributing
 
-Thank you for your interest in Aether census. This document tells you how to report a bug, suggest a change, and send a pull request.
+Thanks for taking a look. The project is early, so small, concrete contributions help the most.
 
-## Development setup
+## Setup
 
-You need Node 22 or later and pnpm.
+Needs Node 22+ and pnpm.
 
 ```sh
 pnpm install
-pnpm lint        # Biome lint and format check
+pnpm lint
 pnpm typecheck
 pnpm test
-pnpm census fixtures validate
 ```
 
-Run `pnpm format` to fix the format automatically.
+`pnpm format` fixes formatting.
 
-## Add a fixture
+## Adding a fixture
 
-A fixture is the easiest first contribution. Each fixture is one JSON file in `fixtures/`.
-1. Find a real failure, for example a public issue where a provider or gateway rejected or changed a tool schema.
-2. Make the smallest tool definition that shows the failure.
-3. Use `"source": { "kind": "issue", "url": "..." }` with the issue URL.
-4. List the JSON Pointers that must survive in `expect.preserved`.
-5. Name the file `<id>.json`, and run `pnpm census fixtures validate`.
+This is the best first contribution. If you've seen a provider or gateway reject or quietly change a tool schema:
 
-Do not copy private schemas or customer data into a fixture.
+1. Cut the tool definition down to the smallest one that still shows the problem.
+2. Save it as `fixtures/<id>.json`. The id is kebab-case and matches the file name.
+3. Set `source` to `{ "kind": "issue", "url": "..." }`, pointing at a public issue or discussion.
+4. In `expect.preserved`, list JSON Pointers to the constraints that should survive.
+5. Run `pnpm census fixtures validate`.
 
-## Code of conduct
+Please don't paste schemas from private codebases.
 
-This project uses the [Contributor Covenant](CODE_OF_CONDUCT.md). When you take part in this project, you agree to obey its rules.
+## Bigger changes
 
-## Report a bug
+Open an issue first for anything beyond a fixture or a small fix: new endpoint adapters, changes to how outcomes get classified, anything that would change results. It saves both of us time.
 
-> **Caution:** Do not report a security vulnerability in a public issue. Use the process in [SECURITY.md](SECURITY.md).
-1. Search the [open issues](https://github.com/Reec1e33/aetherAI/issues). Make sure that nobody reported the same bug.
-2. Open a new issue with the **Bug report** form.
-3. Give the steps to reproduce the bug, the expected result, and the actual result.
+## Pull requests
 
-## Suggest a change
+- One change per PR, with tests.
+- CI runs lint, typecheck, and tests. It never makes paid API calls.
+- Live probes run on your machine with your own keys. Commit the run config and the raw results, never the keys.
+- Results you don't like get reported too. A run doesn't get dropped because it came out "wrong".
 
-- For a small fix, send a pull request directly. Examples of a small fix are a typo, a broken link, or a one-line bug fix.
-- For a large change, open an issue first. Examples of a large change are a new feature, a new experiment, or a change to the evaluation method.
-- Wait for agreement on the issue before you write the code. This step prevents work that the project cannot accept.
+## Security
 
-## Send a pull request
-
-1. Fork the repository.
-2. Make a branch from `main`. Give the branch a short name that tells its purpose, for example `fix/pointer-escape`.
-3. Make one logical change in each pull request.
-4. Add or update the tests for the change.
-5. Run the tests and the linters on your machine. Make sure that they pass.
-6. Open the pull request against `main`, and fill in the pull request template.
-7. Link the related issue, for example `Closes #12`.
-
-The maintainer reviews each pull request. All CI checks must pass before the merge.
-
-## Research contributions
-
-Aether census is a research project. Each change to an experiment must be reproducible.
-- Record the endpoint, the exact model ID, and the date of each run.
-- Put the experiment configuration in the repository. Do not put it only in the pull request text.
-- Report all results, including negative results. Do not remove a run because its result is bad.
-
-> **Caution:** Do not commit API keys, `.env` files, or private data. CI never makes paid API calls. Run live probes on your machine with your own keys.
-
-If a silent drop has a security effect in a provider or gateway, do not open a public issue. Report it privately to that project first.
+If you find a silent drop with security impact in a provider or gateway, report it to that project privately first. For problems in this repo, see [SECURITY.md](SECURITY.md).
 
 ## AI tools
 
-You can use AI tools to help you write a contribution. You must understand and test each line that you send. Write replies to reviewers yourself.
+Fine to use. You're responsible for understanding and testing everything you submit, and please write your own replies in review.
 
-## Commit messages
+## Code of conduct
 
-- Write the subject line as a command, for example "Add judge retry". Do not write "Added judge retry".
-- Use a maximum of 72 characters in the subject line.
-- Use the commit body to tell why you made the change.
+This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md).
 
 ## License
 
-When you send a contribution, you agree to license it under the [MIT License](LICENSE).
+Contributions are licensed under [MIT](LICENSE).

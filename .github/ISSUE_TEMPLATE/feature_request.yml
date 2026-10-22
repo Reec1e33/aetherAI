@@ -1,30 +1,15 @@
-name: Feature request
-description: Suggest a new feature, experiment, or change.
+name: Idea or new fixture
+description: A schema failure you've seen, a new endpoint, or another idea.
 labels: ["enhancement"]
 body:
   - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: What problem does this request solve? Who has this problem?
+      label: What's the problem?
+      description: If it's a provider or gateway mangling a schema, link the issue or paste a minimal schema.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed solution
-      description: Describe the change that you want.
-    validations:
-      required: true
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives
-      description: Describe other solutions that you considered.
-  - type: checkboxes
-    id: checks
-    attributes:
-      label: Checks
-      options:
-        - label: I searched the open issues, and this request is not a duplicate.
-          required: true
+      label: What would you like to happen?
