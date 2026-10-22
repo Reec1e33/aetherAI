@@ -63,7 +63,7 @@ The most useful thing is a fixture from a real failure you've hit. A new library
 
 ## Background
 
-This repo used to be AetherAI, a SpartaHack X project that Tanzil Zubair Bin Zaman and I built in February 2025. It rewrote your prompt with GPT-4 and showed both answers side by side, along with a "time saved" number that was really just the ratio of the two answer lengths times 20 seconds. That number didn't measure anything. The old code is at the [`spartahack-2025`](https://github.com/Reec1e33/aetherAI/tree/spartahack-2025) tag.
+This repo used to be AetherAI, a SpartaHack X project that Tanzil Zubair Bin Zaman and I built in February 2025. It rewrote your prompt with GPT-4 and showed both answers side by side, along with a "time saved" number that was really just the ratio of the two answer lengths times 20 seconds. That number didn't measure anything. The old code is at the [`spartahack-2025`](https://github.com/Reec1e33/aether-census/tree/spartahack-2025) tag.
 
 ## License
 
