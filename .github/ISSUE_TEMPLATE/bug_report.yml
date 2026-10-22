@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a problem in AetherAI.
+description: Report a problem in Aether census.
 labels: ["bug"]
 body:
   - type: markdown
@@ -48,4 +48,4 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Give your OS, your Python version, and the model provider, if applicable.
+      description: Give your OS, your Node version, and the provider or gateway, if applicable.

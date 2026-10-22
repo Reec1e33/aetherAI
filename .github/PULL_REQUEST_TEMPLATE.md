@@ -24,5 +24,5 @@
 - [ ] The tests and the linters pass on my machine.
 - [ ] I added or updated the tests for this change.
 - [ ] I updated the documentation, if necessary.
-- [ ] For an experiment change: I recorded the models, prompts, seeds, and dataset version.
+- [ ] For an experiment change: I recorded the endpoints, the exact model IDs, and the run dates.
 - [ ] This change contains no secrets, API keys, or private data.
