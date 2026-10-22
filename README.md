@@ -2,66 +2,64 @@
 
 Does your tool schema survive the trip to the model?
 
-You write one JSON Schema for a tool, then send it through OpenAI, Anthropic, Gemini, Bedrock, or a gateway like LiteLLM or OpenRouter. Somewhere along the way it can get rejected, which is the easy case because you get an error. Or it can get quietly rewritten, which is the bad case.
+You write one JSON Schema for a tool, then hand it to an SDK or gateway that turns it into a request for OpenAI, Anthropic, Gemini, Bedrock, and so on. Somewhere in that translation, parts of the schema can quietly disappear. Nothing errors, nothing gets logged, and nothing on the provider side stops the model from sending arguments your schema was supposed to forbid.
 
-A real example from LiteLLM ([#43325](https://github.com/BerriAI/litellm/issues/43325)). This nullable field:
+This repo measures that. It runs 28 tool schemas through 19 library + provider combinations, catches each request before it leaves the machine, and checks whether the schema that went out still enforces what the original did.
 
-```json
-{ "type": ["string", "null"], "enum": ["open", "closed"], "maxLength": 6 }
-```
+## What I found (first run, 2026-10-22)
 
-goes out to Gemini as:
+| Library → provider | Constraints still enforced | Notes |
+| --- | --- | --- |
+| AI SDK → all 8 providers | 34 / 34 | Sends the schema through unchanged, including to Gemini (`parametersJsonSchema`). |
+| LiteLLM → OpenAI | 34 / 34 | |
+| Pydantic AI → Anthropic | 34 / 34 | |
+| Pydantic AI → OpenAI | 34 / 34 | But one schema becomes impossible to satisfy (below). |
+| LiteLLM → Anthropic | 33 / 34 | Drops `dependentRequired`. |
+| LiteLLM → Groq, Mistral, xAI | 33 / 34 | Drops `additionalProperties: false`. Two schemas get broken (below). |
+| LiteLLM → Bedrock | 32 / 34 | Same as above, plus `dependentRequired`. |
+| Pydantic AI → Gemini | 30 / 34 | Drops exclusive bounds; moves `format` into the description as a hint. |
+| LiteLLM → Gemini | 18 / 34 | Drops `const`, `multipleOf`, `uniqueItems`, `not`, `oneOf`, `allOf`, `additionalProperties`, and every constraint on a nullable field written as `["string", "null"]`. |
+| LangChain → Gemini | 13 / 34 | Drops `pattern`, `minimum`/`maximum`, `minLength`/`maxLength`, `minItems`/`maxItems`, `format`, `anyOf`, and more. Six schemas also change shape (below). |
 
-```json
-{ "anyOf": [{ "type": "string" }, { "type": "null" }] }
-```
+"Constraints still enforced" means: for each of 34 test cases, a value the original schema rejects is still rejected by the schema that was actually sent. Full table, per constraint: [`results/summary.md`](results/summary.md). There's also a short deck with the results in [`docs/deck.html`](docs/deck.html) (download and open it in a browser); its charts are filled from `results/results.json` by `harness/deck_data.py`.
 
-The enum and the length limit are gone. Nothing errors, nothing gets logged, and nothing on the provider side stops the model from sending `"status": "archived"`.
+Dropping is the obvious failure. The sneakier one is a schema that comes out *stricter or broken*, so a model that follows it can't send a value you'd accept:
 
-Issue trackers are full of one-off reports like this (a list is in [docs/research-plan.md](docs/research-plan.md)). What I couldn't find is a systematic answer to: across the main providers and gateways, which schema keywords make it through, which get rejected, and which get dropped without a word? That's what this repo is for.
+- **LiteLLM → Groq / Mistral / xAI / Bedrock** puts `"type": "object"` inside every `allOf` branch. An integer field with `allOf: [{minimum: 0}, {maximum: 100}]` becomes a field no value can satisfy.
+- **Same paths** turn `anyOf: [{...}, {type: "null"}]` into `nullable: true`. That's OpenAPI, not JSON Schema, so `null` stops being valid.
+- **Pydantic AI → OpenAI** adds `additionalProperties: false` to a free-form object that has `minProperties: 1`. Nothing can satisfy that.
+- **LangChain → Gemini** turns `oneOf`, free-form objects, and nullable type arrays into `STRING`, and marks optional nested fields as required.
 
-## What it records
+Some of this is already reported upstream ([LiteLLM #43325](https://github.com/BerriAI/litellm/issues/43325), [LiteLLM #41913](https://github.com/BerriAI/litellm/issues/41913), [langchain-google #1725](https://github.com/langchain-ai/langchain-google/issues/1725)). For the `allOf`, `nullable`, `minProperties`, and `STRING` cases I couldn't find an existing issue.
 
-For every fixture and endpoint pair, one of:
+## How it works
 
-| Outcome | Meaning |
-| --- | --- |
-| `accept` | The schema went through and the model's arguments respected it. |
-| `reject` | The endpoint returned an error for the schema. |
-| `silent_drop` | The endpoint returned success but ignored part of the schema. |
-| `semantic_loss` | Something rewrote the schema into a weaker one, e.g. `anyOf` cut down to its first branch. |
+1. **Fixtures.** Each file in [`fixtures/`](fixtures/) is a tool schema, some arguments it must accept, and for each constraint under test, an argument object that breaks only that constraint. The loader proves that last part: the bad object fails against the schema, then passes once that one constraint is removed. So a case can't fail for some unrelated reason.
+2. **Capture.** Each library builds a real request for every fixture. The AI SDK gets a custom `fetch`; the Python libraries get their `httpx`/`httpx2` transports replaced and sockets blocked. Nothing reaches a provider and no API keys are involved.
+3. **Judge.** Find the tool schema in the request body, convert Gemini's OpenAPI subset to JSON Schema where needed, and run the fixture's examples against it with Ajv.
 
-## Status
+## What this does and doesn't tell you
 
-Early. The fixture format, its validation, and a small CLI are done. The probe runner and the provider adapters are next. There are no results yet, and none will go up until they can be reproduced from this repo.
+- It measures what the **library sends**. A schema that goes out intact can still be ignored or rejected by the provider; that's the next step and needs API keys.
+- Some drops are the library working around a provider that doesn't support a keyword. That's still worth knowing, because nothing tells you it happened (LangChain does log a warning for some keywords).
+- `format` is only an annotation in JSON Schema 2020-12 unless a validator opts in. I count it because some providers enforce formats in strict mode.
+- One model ID per provider. Some libraries pick a different code path by model name.
 
-## Try it
+## Run it yourself
 
-Needs Node 22+ and pnpm.
+Needs Node 22+, pnpm, and Python 3.12+.
 
 ```sh
 pnpm install
+./harness/run.sh        # captures everything again, then writes results/
 pnpm test
-pnpm census fixtures validate
 ```
 
-## Fixtures
+`run.sh` builds one virtualenv per Python library from the lockfiles in [`harness/requirements/`](harness/requirements/), because LiteLLM and Pydantic AI need different major versions of `openai`. CI re-captures the AI SDK requests on every push and fails if the results change.
 
-Each file in [`fixtures/`](fixtures/) is one tool definition plus the constraints that should still hold on the other side:
+## Contributing
 
-```json
-{
-  "id": "nullable-type-array-enum",
-  "source": { "kind": "issue", "url": "https://github.com/BerriAI/litellm/issues/43325" },
-  "keywords": ["type-array", "enum", "maxLength"],
-  "tool": { "name": "set_status", "parameters": { "...": "..." } },
-  "expect": { "preserved": ["/properties/status/enum", "/properties/status/maxLength"] }
-}
-```
-
-`expect.preserved` is a list of JSON Pointers into the schema. The validator checks that each one exists, so a typo can't turn into a fake pass.
-
-If you've hit a provider or gateway mangling a tool schema, a fixture for it is the most useful thing you can contribute. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The most useful thing is a fixture from a real failure you've hit. A new library to capture is next. See [CONTRIBUTING.md](CONTRIBUTING.md). Notes and open questions are in [docs/research-plan.md](docs/research-plan.md).
 
 ## Background
 
