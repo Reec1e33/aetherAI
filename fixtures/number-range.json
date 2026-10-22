@@ -1,0 +1,42 @@
+{
+  "id": "number-range",
+  "description": "An integer with inclusive bounds.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["minimum", "maximum"],
+  "tool": {
+    "name": "set_rating",
+    "description": "Rate something from 1 to 10.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        }
+      },
+      "required": ["rating"]
+    }
+  },
+  "valid": [
+    {
+      "rating": 7
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/rating/minimum",
+      "invalid": {
+        "rating": 0
+      }
+    },
+    {
+      "constraint": "/properties/rating/maximum",
+      "invalid": {
+        "rating": 11
+      }
+    }
+  ]
+}

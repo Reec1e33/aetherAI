@@ -1,0 +1,42 @@
+{
+  "id": "dependent-required",
+  "description": "A field that requires another field.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["dependentRequired"],
+  "tool": {
+    "name": "charge_card",
+    "description": "Charge a card.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "card": {
+          "type": "string"
+        },
+        "cvv": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "dependentRequired": {
+        "card": ["cvv"]
+      }
+    }
+  },
+  "valid": [
+    {
+      "card": "4242",
+      "cvv": "123"
+    },
+    {}
+  ],
+  "cases": [
+    {
+      "constraint": "/dependentRequired",
+      "invalid": {
+        "card": "4242"
+      }
+    }
+  ]
+}

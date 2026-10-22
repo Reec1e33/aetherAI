@@ -1,0 +1,38 @@
+{
+  "id": "array-unique",
+  "description": "An array whose items must be unique.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["uniqueItems"],
+  "tool": {
+    "name": "pick_seats",
+    "description": "Pick distinct seat numbers.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "seats": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": ["seats"]
+    }
+  },
+  "valid": [
+    {
+      "seats": [1, 2]
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/seats/uniqueItems",
+      "invalid": {
+        "seats": [3, 3]
+      }
+    }
+  ]
+}

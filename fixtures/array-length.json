@@ -1,0 +1,45 @@
+{
+  "id": "array-length",
+  "description": "An array with a minimum and maximum number of items.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["minItems", "maxItems"],
+  "tool": {
+    "name": "tag_post",
+    "description": "Tag a post with 1 to 3 tags.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        }
+      },
+      "required": ["tags"]
+    }
+  },
+  "valid": [
+    {
+      "tags": ["a", "b"]
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/tags/minItems",
+      "invalid": {
+        "tags": []
+      }
+    },
+    {
+      "constraint": "/properties/tags/maxItems",
+      "invalid": {
+        "tags": ["a", "b", "c", "d"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "pattern",
+  "description": "A string that must match a regular expression.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["pattern"],
+  "tool": {
+    "name": "lookup_zip",
+    "description": "Look up a US ZIP code.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "zip": {
+          "type": "string",
+          "pattern": "^[0-9]{5}$"
+        }
+      },
+      "required": ["zip"]
+    }
+  },
+  "valid": [
+    {
+      "zip": "48823"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/zip/pattern",
+      "invalid": {
+        "zip": "ABCDE"
+      }
+    }
+  ]
+}

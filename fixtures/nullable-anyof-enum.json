@@ -1,0 +1,45 @@
+{
+  "id": "nullable-anyof-enum",
+  "description": "A nullable string written with anyOf, with enum.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["anyOf", "enum"],
+  "tool": {
+    "name": "set_status",
+    "description": "Set the status of an issue.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": ["open", "closed"]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": ["status"]
+    }
+  },
+  "valid": [
+    {
+      "status": "closed"
+    },
+    {
+      "status": null
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/status/anyOf/0/enum",
+      "invalid": {
+        "status": "archive"
+      }
+    }
+  ]
+}

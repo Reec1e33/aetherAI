@@ -1,0 +1,35 @@
+{
+  "id": "multiple-of",
+  "description": "An integer that must be a multiple of 5.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["multipleOf"],
+  "tool": {
+    "name": "set_timeout",
+    "description": "Set a timeout in minutes, in steps of 5.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "minutes": {
+          "type": "integer",
+          "multipleOf": 5
+        }
+      },
+      "required": ["minutes"]
+    }
+  },
+  "valid": [
+    {
+      "minutes": 15
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/minutes/multipleOf",
+      "invalid": {
+        "minutes": 7
+      }
+    }
+  ]
+}

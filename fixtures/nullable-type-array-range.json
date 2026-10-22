@@ -1,0 +1,45 @@
+{
+  "id": "nullable-type-array-range",
+  "description": "A nullable integer written as a type array, with bounds.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["type-array", "minimum", "maximum"],
+  "tool": {
+    "name": "set_priority",
+    "description": "Set a priority from 1 to 5, or clear it.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "priority": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 5
+        }
+      },
+      "required": ["priority"]
+    }
+  },
+  "valid": [
+    {
+      "priority": 3
+    },
+    {
+      "priority": null
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/priority/minimum",
+      "invalid": {
+        "priority": 0
+      }
+    },
+    {
+      "constraint": "/properties/priority/maximum",
+      "invalid": {
+        "priority": 6
+      }
+    }
+  ]
+}

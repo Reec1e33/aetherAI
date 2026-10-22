@@ -1,0 +1,42 @@
+{
+  "id": "exclusive-range",
+  "description": "A number with exclusive bounds.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["exclusiveMinimum", "exclusiveMaximum"],
+  "tool": {
+    "name": "set_probability",
+    "description": "Set a probability strictly between 0 and 1.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "p": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        }
+      },
+      "required": ["p"]
+    }
+  },
+  "valid": [
+    {
+      "p": 0.5
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/p/exclusiveMinimum",
+      "invalid": {
+        "p": 0
+      }
+    },
+    {
+      "constraint": "/properties/p/exclusiveMaximum",
+      "invalid": {
+        "p": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "ref-defs",
+  "description": "A field defined through $ref and $defs.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["$ref", "$defs", "required"],
+  "tool": {
+    "name": "ship_gift",
+    "description": "Ship a gift to an address.",
+    "parameters": {
+      "type": "object",
+      "required": ["to"],
+      "properties": {
+        "to": {
+          "$ref": "#/$defs/address"
+        }
+      },
+      "$defs": {
+        "address": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            },
+            "zip": {
+              "type": "string"
+            }
+          },
+          "required": ["city"]
+        }
+      }
+    }
+  },
+  "valid": [
+    {
+      "to": {
+        "city": "Flint"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/$defs/address/required",
+      "invalid": {
+        "to": {
+          "zip": "48502"
+        }
+      }
+    }
+  ]
+}

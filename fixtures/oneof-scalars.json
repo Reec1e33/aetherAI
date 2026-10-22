@@ -1,0 +1,46 @@
+{
+  "id": "oneof-scalars",
+  "description": "A value that is either a short string or a small integer.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["oneOf"],
+  "tool": {
+    "name": "set_label",
+    "description": "Set a label as text or as a number.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "oneOf": [
+            {
+              "type": "string",
+              "maxLength": 3
+            },
+            {
+              "type": "integer",
+              "maximum": 9
+            }
+          ]
+        }
+      },
+      "required": ["label"]
+    }
+  },
+  "valid": [
+    {
+      "label": "abc"
+    },
+    {
+      "label": 4
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/label/oneOf",
+      "invalid": {
+        "label": true
+      }
+    }
+  ]
+}

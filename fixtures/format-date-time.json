@@ -1,0 +1,35 @@
+{
+  "id": "format-date-time",
+  "description": "A string in RFC 3339 date-time format.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["format"],
+  "tool": {
+    "name": "schedule_meeting",
+    "description": "Schedule a meeting.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["start"]
+    }
+  },
+  "valid": [
+    {
+      "start": "2026-10-22T15:00:00Z"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/start/format",
+      "invalid": {
+        "start": "tomorrow afternoon"
+      }
+    }
+  ]
+}

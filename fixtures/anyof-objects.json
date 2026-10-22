@@ -1,0 +1,72 @@
+{
+  "id": "anyof-objects",
+  "description": "A union of two object shapes.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["anyOf", "const"],
+  "tool": {
+    "name": "send_payment",
+    "description": "Pay by card or by bank transfer.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "card"
+                },
+                "last4": {
+                  "type": "string"
+                }
+              },
+              "required": ["kind", "last4"]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "bank"
+                },
+                "iban": {
+                  "type": "string"
+                }
+              },
+              "required": ["kind", "iban"]
+            }
+          ]
+        }
+      },
+      "required": ["method"]
+    }
+  },
+  "valid": [
+    {
+      "method": {
+        "kind": "card",
+        "last4": "4242"
+      }
+    },
+    {
+      "method": {
+        "kind": "bank",
+        "iban": "DE00"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/method/anyOf",
+      "invalid": {
+        "method": {
+          "kind": "cash"
+        }
+      }
+    }
+  ]
+}

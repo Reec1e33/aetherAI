@@ -1,7 +1,9 @@
 {
   "id": "enum-string",
-  "description": "A string parameter limited by enum. A faithful endpoint keeps the enum and the model picks one of its values.",
-  "source": { "kind": "synthetic" },
+  "description": "A string limited to two values.",
+  "source": {
+    "kind": "synthetic"
+  },
   "keywords": ["enum"],
   "tool": {
     "name": "get_weather",
@@ -9,12 +11,30 @@
     "parameters": {
       "type": "object",
       "properties": {
-        "city": { "type": "string" },
-        "unit": { "type": "string", "enum": ["celsius", "fahrenheit"] }
+        "city": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["celsius", "fahrenheit"]
+        }
       },
-      "required": ["city", "unit"],
-      "additionalProperties": false
+      "required": ["city", "unit"]
     }
   },
-  "expect": { "preserved": ["/properties/unit/enum"] }
+  "valid": [
+    {
+      "city": "Lansing",
+      "unit": "celsius"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/unit/enum",
+      "invalid": {
+        "city": "Lansing",
+        "unit": "kelvin"
+      }
+    }
+  ]
 }
