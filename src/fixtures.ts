@@ -20,7 +20,7 @@ export const Fixture = z.object({
     parameters: z.record(z.string(), z.unknown()),
   }),
   expect: z.object({
-    /** JSON Pointers into `tool.parameters` that a faithful endpoint must keep. */
+    /** JSON Pointers into `tool.parameters` for the constraints that must still hold after the endpoint processes the schema. */
     preserved: z.array(z.string().startsWith("/")).min(1),
   }),
 });

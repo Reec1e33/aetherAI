@@ -1,0 +1,18 @@
+{
+  "id": "nullable-type-array-enum",
+  "description": "A nullable string written as a type array, with enum and maxLength. LiteLLM's Gemini/Vertex conversion turns it into anyOf and drops both constraints.",
+  "source": { "kind": "issue", "url": "https://github.com/BerriAI/litellm/issues/43325" },
+  "keywords": ["type-array", "enum", "maxLength"],
+  "tool": {
+    "name": "set_status",
+    "description": "Set the status of an issue.",
+    "parameters": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": ["string", "null"], "enum": ["open", "closed"], "maxLength": 6 }
+      }
+    }
+  },
+  "expect": { "preserved": ["/properties/status/enum", "/properties/status/maxLength"] }
+}
