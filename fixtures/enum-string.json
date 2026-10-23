@@ -1,0 +1,40 @@
+{
+  "id": "enum-string",
+  "description": "A string limited to two values.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["enum"],
+  "tool": {
+    "name": "get_weather",
+    "description": "Get the current weather for a city.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["celsius", "fahrenheit"]
+        }
+      },
+      "required": ["city", "unit"]
+    }
+  },
+  "valid": [
+    {
+      "city": "Lansing",
+      "unit": "celsius"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/unit/enum",
+      "invalid": {
+        "city": "Lansing",
+        "unit": "kelvin"
+      }
+    }
+  ]
+}

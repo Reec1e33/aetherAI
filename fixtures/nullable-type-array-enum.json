@@ -1,0 +1,36 @@
+{
+  "id": "nullable-type-array-enum",
+  "description": "A nullable string written as a type array, with enum.",
+  "source": {
+    "kind": "issue",
+    "url": "https://github.com/BerriAI/litellm/issues/43325"
+  },
+  "keywords": ["type-array", "enum"],
+  "tool": {
+    "name": "set_status",
+    "description": "Set the status of an issue.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": ["string", "null"],
+          "enum": ["open", "closed"]
+        }
+      },
+      "required": ["status"]
+    }
+  },
+  "valid": [
+    {
+      "status": "open"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/status/enum",
+      "invalid": {
+        "status": "done"
+      }
+    }
+  ]
+}

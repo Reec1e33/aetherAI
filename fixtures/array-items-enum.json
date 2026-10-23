@@ -1,0 +1,38 @@
+{
+  "id": "array-items-enum",
+  "description": "An array whose items are limited to fixed values.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["items", "enum"],
+  "tool": {
+    "name": "set_colors",
+    "description": "Choose palette colors.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["red", "green", "blue"]
+          }
+        }
+      },
+      "required": ["colors"]
+    }
+  },
+  "valid": [
+    {
+      "colors": ["red", "blue"]
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/colors/items/enum",
+      "invalid": {
+        "colors": ["red", "purple"]
+      }
+    }
+  ]
+}

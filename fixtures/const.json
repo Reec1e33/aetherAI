@@ -1,0 +1,35 @@
+{
+  "id": "const",
+  "description": "A string that must equal one value.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["const"],
+  "tool": {
+    "name": "start_job",
+    "description": "Start a job.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "fast"
+        }
+      },
+      "required": ["mode"]
+    }
+  },
+  "valid": [
+    {
+      "mode": "fast"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/mode/const",
+      "invalid": {
+        "mode": "slow"
+      }
+    }
+  ]
+}

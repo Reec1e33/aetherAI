@@ -1,0 +1,35 @@
+{
+  "id": "format-email",
+  "description": "A string in email format.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["format"],
+  "tool": {
+    "name": "invite_user",
+    "description": "Invite a user by email.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "required": ["email"]
+    }
+  },
+  "valid": [
+    {
+      "email": "ada@example.com"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/email/format",
+      "invalid": {
+        "email": "not an email"
+      }
+    }
+  ]
+}

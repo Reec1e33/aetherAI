@@ -1,0 +1,15 @@
+name: Idea or new fixture
+description: A schema failure you've seen, a new endpoint, or another idea.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem?
+      description: If it's a provider or gateway mangling a schema, link the issue or paste a minimal schema.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?

@@ -1,0 +1,42 @@
+{
+  "id": "allof-range",
+  "description": "Bounds split across allOf.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["allOf"],
+  "tool": {
+    "name": "set_volume",
+    "description": "Set the volume from 0 to 100.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "volume": {
+          "type": "integer",
+          "allOf": [
+            {
+              "minimum": 0
+            },
+            {
+              "maximum": 100
+            }
+          ]
+        }
+      },
+      "required": ["volume"]
+    }
+  },
+  "valid": [
+    {
+      "volume": 50
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/volume/allOf",
+      "invalid": {
+        "volume": 150
+      }
+    }
+  ]
+}

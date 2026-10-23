@@ -1,0 +1,52 @@
+{
+  "id": "array-object-enum",
+  "description": "An enum inside objects inside an array.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["items", "enum"],
+  "tool": {
+    "name": "log_events",
+    "description": "Log a batch of events.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "string",
+                "enum": ["info", "warn", "error"]
+              }
+            },
+            "required": ["level"]
+          }
+        }
+      },
+      "required": ["events"]
+    }
+  },
+  "valid": [
+    {
+      "events": [
+        {
+          "level": "warn"
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/events/items/properties/level/enum",
+      "invalid": {
+        "events": [
+          {
+            "level": "fatal"
+          }
+        ]
+      }
+    }
+  ]
+}

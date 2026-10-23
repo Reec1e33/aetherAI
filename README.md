@@ -1,124 +1,70 @@
-# AetherAI Web App
+# aether-census
 
-AetherAI is a web application designed to boost productivity by refining user queries through the OpenAI API. The app accepts an initial query, enriches it for clarity and detail, and then displays a side-by-side comparison of the original and enhanced responses. In addition, a “time saved” metric is computed to capture the overall efficiency gains achieved by the refinement process.
-Our research indicates that, on average, a ChatGPT query—including the time spent processing and reading the answer—takes roughly 20 seconds. To estimate the efficiency improvement, we compare the word counts of the original and refined responses. Instead of using raw response lengths or estimated reading times, the “time saved” is calculated by multiplying the ratio of the refined query’s word count to the original query’s word count by the baseline query duration (20 seconds). For example, if the refined response contains 1.5 times as many words as the original, the estimated time saved would be 1.5 × 20 = 30 seconds.
-This approach provides users with a clear, research-based metric that reflects improvements in query quality and overall processing efficiency.
+Does your tool schema survive the trip to the model?
 
-## Table of Contents
+You write one JSON Schema for a tool, then hand it to an SDK or gateway that turns it into a request for OpenAI, Anthropic, Gemini, Bedrock, and so on. Somewhere in that translation, parts of the schema can quietly disappear. Nothing errors, nothing gets logged, and nothing on the provider side stops the model from sending arguments your schema was supposed to forbid.
 
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
-- [Development Guidelines](#development-guidelines)
-- [License](#license)
+This repo measures that. It runs 28 tool schemas through 19 library + provider combinations, catches each request before it leaves the machine, and checks whether the schema that went out still enforces what the original did.
 
-## Overview
+## What I found (first run, 2026-10-22)
 
-The AetherAI Web App transforms ordinary queries into enhanced, detailed questions by leveraging OpenAI’s powerful language capabilities. Once a query is refined, the application retrieves and compares responses for both the original and improved versions. Additionally, the app calculates a “time saved” metric based on the difference in response lengths, giving users a clear indication of how much more effective the refined query is.
+| Library → provider | Constraints still enforced | Notes |
+| --- | --- | --- |
+| AI SDK → all 8 providers | 34 / 34 | Sends the schema through unchanged, including to Gemini (`parametersJsonSchema`). |
+| LiteLLM → OpenAI | 34 / 34 | |
+| Pydantic AI → Anthropic | 34 / 34 | |
+| Pydantic AI → OpenAI | 34 / 34 | But one schema becomes impossible to satisfy (below). |
+| LiteLLM → Anthropic | 33 / 34 | Drops `dependentRequired`. |
+| LiteLLM → Groq, Mistral, xAI | 33 / 34 | Drops `additionalProperties: false`. Two schemas get broken (below). |
+| LiteLLM → Bedrock | 32 / 34 | Same as above, plus `dependentRequired`. |
+| Pydantic AI → Gemini | 30 / 34 | Drops exclusive bounds; moves `format` into the description as a hint. |
+| LiteLLM → Gemini | 18 / 34 | Drops `const`, `multipleOf`, `uniqueItems`, `not`, `oneOf`, `allOf`, `additionalProperties`, and every constraint on a nullable field written as `["string", "null"]`. |
+| LangChain → Gemini | 13 / 34 | Drops `pattern`, `minimum`/`maximum`, `minLength`/`maxLength`, `minItems`/`maxItems`, `format`, `anyOf`, and more. Six schemas also change shape (below). |
 
-## Features
+"Constraints still enforced" means: for each of 34 test cases, a value the original schema rejects is still rejected by the schema that was actually sent. Full table, per constraint: [`results/summary.md`](results/summary.md). There's also a short deck with the results in [`docs/deck.html`](docs/deck.html) (download and open it in a browser); its charts are filled from `results/results.json` by `harness/deck_data.py`.
 
-- **User-Friendly Interface:**  
-  A sleek, interactive web interface that allows users to enter queries and view refined outputs in real time.
+Dropping is the obvious failure. The sneakier one is a schema that comes out *stricter or broken*, so a model that follows it can't send a value you'd accept:
 
-- **Query Enhancement:**  
-  Utilizes the OpenAI API to automatically add context and detail to user queries, making them more specific and effective.
+- **LiteLLM → Groq / Mistral / xAI / Bedrock** puts `"type": "object"` inside every `allOf` branch. An integer field with `allOf: [{minimum: 0}, {maximum: 100}]` becomes a field no value can satisfy.
+- **Same paths** turn `anyOf: [{...}, {type: "null"}]` into `nullable: true`. That's OpenAPI, not JSON Schema, so `null` stops being valid.
+- **Pydantic AI → OpenAI** adds `additionalProperties: false` to a free-form object that has `minProperties: 1`. Nothing can satisfy that.
+- **LangChain → Gemini** turns `oneOf`, free-form objects, and nullable type arrays into `STRING`, and marks optional nested fields as required.
 
-- **Response Comparison:**  
-  Displays side-by-side results for the original and refined queries, helping users quickly see the benefits of query improvement.
+Some of this is already reported upstream ([LiteLLM #43325](https://github.com/BerriAI/litellm/issues/43325), [LiteLLM #41913](https://github.com/BerriAI/litellm/issues/41913), [langchain-google #1725](https://github.com/langchain-ai/langchain-google/issues/1725)). For the `allOf`, `nullable`, `minProperties`, and `STRING` cases I couldn't find an existing issue.
 
-- **Efficiency Metric:**  
-  Calculates a “time saved” value based on the response length differences, offering a quantitative measure of improved query performance.
+## How it works
 
-- **Interactive Documentation:**  
-  The backend is powered by FastAPI, providing automatically generated interactive API documentation accessible via the web interface.
+1. **Fixtures.** Each file in [`fixtures/`](fixtures/) is a tool schema, some arguments it must accept, and for each constraint under test, an argument object that breaks only that constraint. The loader proves that last part: the bad object fails against the schema, then passes once that one constraint is removed. So a case can't fail for some unrelated reason.
+2. **Capture.** Each library builds a real request for every fixture. The AI SDK gets a custom `fetch`; the Python libraries get their `httpx`/`httpx2` transports replaced and sockets blocked. Nothing reaches a provider and no API keys are involved.
+3. **Judge.** Find the tool schema in the request body, convert Gemini's OpenAPI subset to JSON Schema where needed, and run the fixture's examples against it with Ajv.
 
-## Project Structure
+## What this does and doesn't tell you
 
+- It measures what the **library sends**. A schema that goes out intact can still be ignored or rejected by the provider; that's the next step and needs API keys.
+- Some drops are the library working around a provider that doesn't support a keyword. That's still worth knowing, because nothing tells you it happened (LangChain does log a warning for some keywords).
+- `format` is only an annotation in JSON Schema 2020-12 unless a validator opts in. I count it because some providers enforce formats in strict mode.
+- One model ID per provider. Some libraries pick a different code path by model name.
 
+## Run it yourself
 
+Needs Node 22+, pnpm, and Python 3.12+.
 
-aetherAI/
-├── LICENSE                   # The license file (e.g., MIT) for the project.
-├── README.md                 # This file describing the project, setup, and usage.
-├── backend/                 # Contains the backend application code.
-│   ├── app/                 # The main application package.
-│   │   ├── api/             # API endpoint definitions (routes, controllers, etc.).
-│   │   ├── core/            # Configuration files and database setup (e.g., config, DB connection).
-│   │   ├── models/          # SQLAlchemy models representing your database schema.
-│   │   ├── services/        # Business logic and integration with external APIs (like OpenAI).
-│   │   ├── main.py          # The entrypoint for the FastAPI application.
-│   │   └── __init__.py      # Initializes the Python package.
-│   └── requirements.txt     # Lists all the Python dependencies for the backend.
-└── venv/                    # The virtual environment directory (should not be tracked in Git).
+```sh
+pnpm install
+./harness/run.sh        # captures everything again, then writes results/
+pnpm test
+```
 
+`run.sh` builds one virtualenv per Python library from the lockfiles in [`harness/requirements/`](harness/requirements/), because LiteLLM and Pydantic AI need different major versions of `openai`. CI re-captures the AI SDK requests on every push and fails if the results change.
 
-## Requirements
+## Contributing
 
-- **Python 3.12** (or a compatible version)
-- Python packages listed in `backend/requirements.txt`, including:
-  - FastAPI
-  - OpenAI Python SDK
-  - uvicorn
-  - 
+The most useful thing is a fixture from a real failure you've hit. A new library to capture is next. See [CONTRIBUTING.md](CONTRIBUTING.md). Notes and open questions are in [docs/research-plan.md](docs/research-plan.md).
 
-## Installation
+## Background
 
-1. **Clone the repository:**
+This repo used to be AetherAI, a SpartaHack X project that Tanzil Zubair Bin Zaman and I built in February 2025. It rewrote your prompt with GPT-4 and showed both answers side by side, along with a "time saved" number that was really just the ratio of the two answer lengths times 20 seconds. That number didn't measure anything. The old code is at the [`spartahack-2025`](https://github.com/Reec1e33/aether-census/tree/spartahack-2025) tag.
 
-   ```bash
-   git clone <repository-url>
-   cd aetherAI
+## License
 
-
-## Installation
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone <repository-url>
-   cd aetherAI
-2. Set up a virtual environment and activate it:
-   python3 -m venv venv
-   source venv/bin/activate
-3. Install the dependencies:
-   pip install -r backend/requirements.txt
-Configuration
-
-Create a .env file in the repository root (or within the backend directory) to store sensitive configuration details. For example:
-
-# .env
-OPENAI_API_KEY=your_openai_api_key_here
-Note: Ensure that your .env file is added to your .gitignore to prevent it from being committed.
-Running the Application
-
-From the repository root, start the FastAPI server by running:
-Then access the interactive API documentation at http://localhost:8000/docs.
-Development Guidelines
-
-Version Control:
-Ensure your repository’s .gitignore file (located at the project root) contains the following entries to prevent tracking of virtual environment files and Python cache files:
-# Byte-compiled / optimized files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environment directory
-venv/
-.env
-
-Removing Tracked Files:
-If files from your virtual environment or __pycache__ directories have been committed accidentally, remove them from version control (without deleting them locally) by running:
-git rm -r --cached venv/
-find . -type d -name "__pycache__" -exec git rm -r --cached {} \;
-git commit -m "Remove virtual environment and cache files from version control"
-API Testing:
-Utilize FastAPI’s built-in Swagger UI for interactive testing of your endpoints during development.
-License
-
-This project is licensed under the MIT License.
-
+MIT

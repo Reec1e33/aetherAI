@@ -1,0 +1,47 @@
+{
+  "id": "required-nested",
+  "description": "A required field inside a nested object.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["required"],
+  "tool": {
+    "name": "ship_order",
+    "description": "Ship an order to an address.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            },
+            "street": {
+              "type": "string"
+            }
+          },
+          "required": ["city"]
+        }
+      },
+      "required": ["address"]
+    }
+  },
+  "valid": [
+    {
+      "address": {
+        "city": "Detroit"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/address/required",
+      "invalid": {
+        "address": {
+          "street": "Main St"
+        }
+      }
+    }
+  ]
+}

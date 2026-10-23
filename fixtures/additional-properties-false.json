@@ -1,0 +1,36 @@
+{
+  "id": "additional-properties-false",
+  "description": "An object that allows no extra fields.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["additionalProperties"],
+  "tool": {
+    "name": "update_profile",
+    "description": "Update profile fields.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  },
+  "valid": [
+    {
+      "name": "Ada"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/additionalProperties",
+      "invalid": {
+        "name": "Ada",
+        "is_admin": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "required-top-level",
+  "description": "Two required top-level fields.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["required"],
+  "tool": {
+    "name": "create_contact",
+    "description": "Create a contact.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "phone"]
+    }
+  },
+  "valid": [
+    {
+      "name": "Ada",
+      "phone": "555-0100"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/required",
+      "invalid": {
+        "name": "Ada"
+      }
+    }
+  ]
+}

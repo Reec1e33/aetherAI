@@ -1,0 +1,37 @@
+{
+  "id": "not-enum",
+  "description": "A string that must not be one forbidden value.",
+  "source": {
+    "kind": "synthetic"
+  },
+  "keywords": ["not"],
+  "tool": {
+    "name": "assign_role",
+    "description": "Assign a role to a user.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "not": {
+            "enum": ["owner"]
+          }
+        }
+      },
+      "required": ["role"]
+    }
+  },
+  "valid": [
+    {
+      "role": "editor"
+    }
+  ],
+  "cases": [
+    {
+      "constraint": "/properties/role/not",
+      "invalid": {
+        "role": "owner"
+      }
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+pydantic-ai-slim[google,openai,anthropic]==2.59.0
+anthropic==1.17.0
