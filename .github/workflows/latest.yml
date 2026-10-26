@@ -1,0 +1,47 @@
+name: Latest versions
+
+# Re-runs the census every week on the newest release of each library, so the
+# committed results don't go stale without anyone noticing. The job fails when a
+# score changes; GitHub then emails the repository owner. It writes nothing back
+# to the repository.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+  # Also run when this check itself changes, so a pull request can test it.
+  pull_request:
+    paths:
+      - .github/workflows/latest.yml
+      - harness/compare_scores.py
+
+permissions:
+  contents: read
+
+jobs:
+  latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Install the newest library releases
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm up --latest ai "@ai-sdk/*"
+          for lib in litellm pydantic-ai langchain; do
+            python -m venv ".venv-$lib"
+            sed -E 's/[=<>~!].*$//' "harness/requirements/$lib.txt" > "/tmp/$lib.txt"
+            ".venv-$lib/bin/pip" install -q -U -r "/tmp/$lib.txt"
+          done
+      - name: Re-run the census
+        run: ./harness/run.sh
+      - name: Compare scores with the committed results
+        run: |
+          git show HEAD:results/results.json > /tmp/committed.json
+          python harness/compare_scores.py /tmp/committed.json results/results.json >> "$GITHUB_STEP_SUMMARY"

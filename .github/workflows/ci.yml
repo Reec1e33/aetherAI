@@ -18,14 +18,22 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: harness/requirements/*.lock
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
       - run: node dist/cli.js fixtures validate
-      - name: Results reproduce from the committed captures
+      # Every library, every model, from scratch, with sockets blocked. Then the same
+      # Python captures in reverse target order, so no state leaks between targets.
+      - name: Re-run the whole census
+        run: ./harness/run.sh --check
+      - name: Results match the committed ones
         run: |
-          node dist/cli.js capture ai-sdk captures/ai-sdk.jsonl
-          node dist/cli.js evaluate captures results
-          git diff --exit-code -- captures results
+          git status --porcelain -- captures results
+          test -z "$(git status --porcelain -- captures results)"
