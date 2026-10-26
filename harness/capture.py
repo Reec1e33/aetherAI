@@ -10,6 +10,7 @@ Pydantic AI need different major versions of the openai package:
 
 from __future__ import annotations
 
+import copy
 import importlib
 import importlib.metadata
 import json
@@ -173,7 +174,9 @@ def capture(library: str, out_path: Path) -> None:
             SENT.clear()
             error = None
             try:
-                send(fx)
+                # A fresh copy per target: LiteLLM's Gemini path rewrites the tool dict in
+                # place (BerriAI/litellm#46921), which would leak into every later target.
+                send(copy.deepcopy(fx))
             except Exception as exc:  # the 400 always raises; keep the text for client-side failures
                 error = "".join(traceback.format_exception_only(exc)).strip()
 
