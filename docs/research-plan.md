@@ -35,14 +35,15 @@ The first run covers the **library layer only**: what the SDK or gateway puts on
 - 19 targets: the AI SDK with 8 providers, LiteLLM with 7, Pydantic AI with 3, LangChain's Google package.
 - Requests are caught before they leave the machine. Python sockets are blocked outright after an early version of the harness let a few requests through to OpenAI and Google with a fake key (they were rejected, and no real key or data was involved, but "probably offline" isn't good enough).
 - Each library gets its own virtualenv with locked dependencies. LiteLLM and Pydantic AI can't share one (different major versions of `openai`), and Pydantic AI 2.59 breaks with `anthropic` 2.x ([pydantic-ai #10923](https://github.com/pydantic/pydantic-ai/issues/10923)), so that env pins `anthropic==1.17.0`.
+- Each target gets a fresh copy of each fixture. The first version didn't, and LiteLLM's Gemini path rewrites the tool dict in place ([LiteLLM #46921](https://github.com/BerriAI/litellm/issues/46921)), so the LiteLLM targets that ran after Gemini were judged on the Gemini version. Found by a fact-check pass on 2026-10-26 and corrected; see the README's Corrections section. A test that runs each target alone would have caught it, and the Python captures aren't re-run in CI yet.
 
-Results are in [`results/summary.md`](../results/summary.md) and summarized in the README. The short version: the AI SDK passes schemas through untouched; every library that *converts* schemas for Gemini loses a lot (LangChain keeps 13 of 34, LiteLLM 18); and several paths make schemas stricter or unsatisfiable, which is harder to notice than a drop.
+Results are in [`results/summary.md`](../results/summary.md) and summarized in the README. The short version: the AI SDK passes schemas through untouched; every library that *converts* schemas for Gemini loses a lot (LangChain keeps 14 of 34, LiteLLM 18); and some paths make schemas stricter or unsatisfiable, which is harder to notice than a drop.
 
 ## Next
 
 **Wave 2: does the provider honor what it receives?** The library layer is half the story. For each provider, send the schemas with real keys and a prompt that pushes toward a forbidden value, then validate the returned arguments against the original schema. Strict mode on and off where it exists. This is where the money goes, so keep it to flagship models and a few samples per cell.
 
-**Upstream.** Write up the cases with no existing issue (LiteLLM's `allOf` and `nullable` rewrites, Pydantic AI's `minProperties` + `additionalProperties: false`, LangChain's fallback to `STRING`), one minimal reproduction each, and file them. Re-run after fixes land.
+**Upstream.** Write up the two cases with no existing issue (Pydantic AI's `minProperties` + `additionalProperties: false`, and LangChain turning nullable type arrays into `STRING`), one minimal reproduction each, and file them. Add the census data to the existing issues where it helps. Re-run after fixes land.
 
 **More libraries.** LangChain's OpenAI and Anthropic packages, Mastra, the OpenAI Agents SDK, and Spring AI or LangChain4j if someone wants to own a JVM harness.
 

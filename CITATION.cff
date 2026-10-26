@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use these results or this code, please cite it as below."
+title: "aether-census: what LLM SDKs and gateways do to tool schemas"
+abstract: >-
+  A census of what LLM SDKs and gateways send to the model provider when you
+  give them a JSON Schema tool definition. 28 fixtures with 34 constraint cases
+  are captured offline through 19 library and provider paths, and each sent
+  schema is checked against the original with a JSON Schema validator.
+authors:
+  - given-names: Reece Owen
+    family-names: Roskam
+repository-code: "https://github.com/Reec1e33/aether-census"
+url: "https://reec1e33.github.io/aether-census/deck.html"
+license: MIT
+date-released: 2026-10-22
+keywords:
+  - tool calling
+  - function calling
+  - JSON Schema
+  - LLM
+  - structured outputs

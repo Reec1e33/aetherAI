@@ -2,7 +2,7 @@
   "name": "aether-census",
   "version": "0.0.0",
   "private": true,
-  "description": "Measures which tool schemas each LLM provider and gateway accepts, rejects, or silently changes.",
+  "description": "Measures what LLM SDKs and gateways drop or break when they translate a tool schema for a provider.",
   "license": "MIT",
   "type": "module",
   "bin": {
