@@ -382,7 +382,7 @@ table { border-collapse: collapse; font-family: var(--sans); font-size: 0.78rem;
 
     <section class="slide" id="upstream" aria-labelledby="t-upstream">
       <p class="eyebrow">Known and new</p>
-      <h2 id="t-upstream">Most of this is already reported. Two cases I couldn't find.</h2>
+      <h2 id="t-upstream">All of it is reported upstream. Two of the reports are new.</h2>
       <div class="table-wrap wide">
         <table class="data findings">
           <thead><tr><th>Finding</th><th>Path</th><th>Upstream</th></tr></thead>
@@ -392,8 +392,8 @@ table { border-collapse: collapse; font-family: var(--sans); font-size: 0.78rem;
             <tr><td>Your tool dict is rewritten in place</td><td>LiteLLM → Gemini</td><td><a href="https://github.com/BerriAI/litellm/issues/46921">#46921</a>, open</td></tr>
             <tr><td>Optional nested fields made required</td><td>LangChain → Gemini</td><td><a href="https://github.com/langchain-ai/langchain-google/issues/1725">langchain-google #1725</a>, open</td></tr>
             <tr><td><code>oneOf</code> and free-form objects become <code>STRING</code></td><td>LangChain → Gemini</td><td><a href="https://github.com/langchain-ai/langchain-google/issues/1998">#1998</a>, <a href="https://github.com/langchain-ai/langchain-google/issues/1622">#1622</a>, open</td></tr>
-            <tr><td>Nullable type arrays become <code>STRING</code></td><td>LangChain → Gemini</td><td>None found</td></tr>
-            <tr><td>Free-form object closed with <code>additionalProperties: false</code></td><td>Pydantic AI → OpenAI</td><td>None found (related: <a href="https://github.com/pydantic/pydantic-ai/issues/5417">pydantic-ai #5417</a>, closed)</td></tr>
+            <tr><td>Nullable type arrays become <code>STRING</code></td><td>LangChain → Gemini</td><td><a href="https://github.com/langchain-ai/langchain-google/issues/2085">#2085</a>, new</td></tr>
+            <tr><td>Free-form object closed with <code>additionalProperties: false</code></td><td>Pydantic AI → OpenAI</td><td><a href="https://github.com/pydantic/pydantic-ai/issues/11419">pydantic-ai #11419</a>, new</td></tr>
           </tbody>
         </table>
       </div>
@@ -416,7 +416,7 @@ table { border-collapse: collapse; font-family: var(--sans); font-size: 0.78rem;
       <h2 id="t-next">Ask the providers, then send the fixes upstream</h2>
       <ul class="points">
         <li><strong>Wave 2.</strong> Send the same schemas to each provider with real keys and a prompt that pushes toward a forbidden value. Check the arguments that come back against the original schema.</li>
-        <li><strong>Upstream.</strong> One minimal reproduction per new finding, filed with the library that owns it, then a re-run once fixes land.</li>
+        <li><strong>Upstream.</strong> The two new findings are filed with an offline reproduction each (<a href="https://github.com/pydantic/pydantic-ai/issues/11419">pydantic-ai #11419</a>, <a href="https://github.com/langchain-ai/langchain-google/issues/2085">langchain-google #2085</a>). The weekly run shows when a fix lands.</li>
         <li><strong>More libraries.</strong> LangChain's other providers, Mastra, the OpenAI Agents SDK.</li>
       </ul>
       <pre class="wide">pnpm install

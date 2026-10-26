@@ -45,7 +45,7 @@ Results are in [`results/summary.md`](../results/summary.md) and summarized in t
 
 **Wave 2: does the provider honor what it receives?** The library layer is half the story. For each provider, send the schemas with real keys and a prompt that pushes toward a forbidden value, then validate the returned arguments against the original schema. Strict mode on and off where it exists. This is where the money goes, so keep it to flagship models and a few samples per cell.
 
-**Upstream.** Write up the two cases with no existing issue (Pydantic AI's `minProperties` + `additionalProperties: false`, and LangChain turning nullable type arrays into `STRING`), one minimal reproduction each, and file them. Add the census data to the existing issues where it helps. Re-run after fixes land.
+**Upstream.** The two cases with no existing issue are filed, each with an offline reproduction: [pydantic-ai #11419](https://github.com/pydantic/pydantic-ai/issues/11419) (`minProperties` + `additionalProperties: false`) and [langchain-google #2085](https://github.com/langchain-ai/langchain-google/issues/2085) (type arrays become `STRING`). Still to do: add census data to the existing issues where it helps. The weekly run on the newest releases shows when a fix lands.
 
 **More libraries.** LangChain's OpenAI and Anthropic packages, Mastra, the OpenAI Agents SDK, and Spring AI or LangChain4j if someone wants to own a JVM harness.
 
