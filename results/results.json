@@ -7422,13 +7422,13 @@
     {
       "targetId": "langchain/gemini",
       "fixtureId": "anyof-objects",
-      "outcome": "silent_drop",
+      "outcome": "accept",
       "field": "parameters",
       "cases": [
         {
           "constraint": "/properties/method/anyOf",
           "keyword": "anyOf",
-          "enforced": false
+          "enforced": true
         }
       ],
       "validRejected": [],
@@ -10888,13 +10888,13 @@
     {
       "targetId": "litellm/bedrock",
       "fixtureId": "additional-properties-false",
-      "outcome": "silent_drop",
+      "outcome": "accept",
       "field": "toolSpec.inputSchema.json",
       "cases": [
         {
           "constraint": "/additionalProperties",
           "keyword": "additionalProperties",
-          "enforced": false
+          "enforced": true
         }
       ],
       "validRejected": [],
@@ -10907,13 +10907,14 @@
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     {
       "targetId": "litellm/bedrock",
       "fixtureId": "allof-range",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "toolSpec.inputSchema.json",
       "cases": [
         {
@@ -10922,9 +10923,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        0
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -10932,12 +10931,10 @@
             "type": "integer",
             "allOf": [
               {
-                "minimum": 0,
-                "type": "object"
+                "minimum": 0
               },
               {
-                "maximum": 100,
-                "type": "object"
+                "maximum": 100
               }
             ]
           }
@@ -11422,7 +11419,7 @@
     {
       "targetId": "litellm/bedrock",
       "fixtureId": "nullable-anyof-enum",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "toolSpec.inputSchema.json",
       "cases": [
         {
@@ -11431,9 +11428,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        1
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -11444,8 +11439,10 @@
                 "enum": [
                   "open",
                   "closed"
-                ],
-                "nullable": true
+                ]
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -11472,17 +11469,13 @@
         "type": "object",
         "properties": {
           "status": {
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "open",
               "closed"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           }
         },
@@ -11513,16 +11506,12 @@
         "type": "object",
         "properties": {
           "priority": {
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 1,
-            "maximum": 5,
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maximum": 5
           }
         },
         "required": [
@@ -11552,16 +11541,12 @@
         "type": "object",
         "properties": {
           "slug": {
+            "type": [
+              "string",
+              "null"
+            ],
             "pattern": "^[a-z]+$",
-            "maxLength": 6,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maxLength": 6
           }
         },
         "required": [
@@ -11797,13 +11782,13 @@
     {
       "targetId": "litellm/mistral",
       "fixtureId": "additional-properties-false",
-      "outcome": "silent_drop",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
           "constraint": "/additionalProperties",
           "keyword": "additionalProperties",
-          "enforced": false
+          "enforced": true
         }
       ],
       "validRejected": [],
@@ -11816,13 +11801,14 @@
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     {
       "targetId": "litellm/mistral",
       "fixtureId": "allof-range",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
@@ -11831,9 +11817,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        0
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -11841,12 +11825,10 @@
             "type": "integer",
             "allOf": [
               {
-                "minimum": 0,
-                "type": "object"
+                "minimum": 0
               },
               {
-                "maximum": 100,
-                "type": "object"
+                "maximum": 100
               }
             ]
           }
@@ -12336,7 +12318,7 @@
     {
       "targetId": "litellm/mistral",
       "fixtureId": "nullable-anyof-enum",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
@@ -12345,9 +12327,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        1
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -12358,8 +12338,10 @@
                 "enum": [
                   "open",
                   "closed"
-                ],
-                "nullable": true
+                ]
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -12386,17 +12368,13 @@
         "type": "object",
         "properties": {
           "status": {
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "open",
               "closed"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           }
         },
@@ -12427,16 +12405,12 @@
         "type": "object",
         "properties": {
           "priority": {
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 1,
-            "maximum": 5,
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maximum": 5
           }
         },
         "required": [
@@ -12469,16 +12443,12 @@
         ],
         "properties": {
           "slug": {
+            "type": [
+              "string",
+              "null"
+            ],
             "pattern": "^[a-z]+$",
-            "maxLength": 6,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maxLength": 6
           }
         }
       }
@@ -12595,6 +12565,11 @@
         ],
         "properties": {
           "to": {
+            "$ref": "#/$defs/address"
+          }
+        },
+        "$defs": {
+          "address": {
             "type": "object",
             "properties": {
               "city": {
@@ -12711,13 +12686,13 @@
     {
       "targetId": "litellm/groq",
       "fixtureId": "additional-properties-false",
-      "outcome": "silent_drop",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
           "constraint": "/additionalProperties",
           "keyword": "additionalProperties",
-          "enforced": false
+          "enforced": true
         }
       ],
       "validRejected": [],
@@ -12730,13 +12705,14 @@
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     {
       "targetId": "litellm/groq",
       "fixtureId": "allof-range",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
@@ -12745,9 +12721,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        0
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -12755,12 +12729,10 @@
             "type": "integer",
             "allOf": [
               {
-                "minimum": 0,
-                "type": "object"
+                "minimum": 0
               },
               {
-                "maximum": 100,
-                "type": "object"
+                "maximum": 100
               }
             ]
           }
@@ -13250,7 +13222,7 @@
     {
       "targetId": "litellm/groq",
       "fixtureId": "nullable-anyof-enum",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
@@ -13259,9 +13231,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        1
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -13272,8 +13242,10 @@
                 "enum": [
                   "open",
                   "closed"
-                ],
-                "nullable": true
+                ]
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -13300,17 +13272,13 @@
         "type": "object",
         "properties": {
           "status": {
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "open",
               "closed"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           }
         },
@@ -13341,16 +13309,12 @@
         "type": "object",
         "properties": {
           "priority": {
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 1,
-            "maximum": 5,
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maximum": 5
           }
         },
         "required": [
@@ -13383,16 +13347,12 @@
         ],
         "properties": {
           "slug": {
+            "type": [
+              "string",
+              "null"
+            ],
             "pattern": "^[a-z]+$",
-            "maxLength": 6,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maxLength": 6
           }
         }
       }
@@ -13509,6 +13469,11 @@
         ],
         "properties": {
           "to": {
+            "$ref": "#/$defs/address"
+          }
+        },
+        "$defs": {
+          "address": {
             "type": "object",
             "properties": {
               "city": {
@@ -13625,13 +13590,13 @@
     {
       "targetId": "litellm/xai",
       "fixtureId": "additional-properties-false",
-      "outcome": "silent_drop",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
           "constraint": "/additionalProperties",
           "keyword": "additionalProperties",
-          "enforced": false
+          "enforced": true
         }
       ],
       "validRejected": [],
@@ -13644,13 +13609,14 @@
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     {
       "targetId": "litellm/xai",
       "fixtureId": "allof-range",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
@@ -13659,9 +13625,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        0
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -13669,12 +13633,10 @@
             "type": "integer",
             "allOf": [
               {
-                "minimum": 0,
-                "type": "object"
+                "minimum": 0
               },
               {
-                "maximum": 100,
-                "type": "object"
+                "maximum": 100
               }
             ]
           }
@@ -14164,7 +14126,7 @@
     {
       "targetId": "litellm/xai",
       "fixtureId": "nullable-anyof-enum",
-      "outcome": "altered",
+      "outcome": "accept",
       "field": "function.parameters",
       "cases": [
         {
@@ -14173,9 +14135,7 @@
           "enforced": true
         }
       ],
-      "validRejected": [
-        1
-      ],
+      "validRejected": [],
       "sentSchema": {
         "type": "object",
         "properties": {
@@ -14186,8 +14146,10 @@
                 "enum": [
                   "open",
                   "closed"
-                ],
-                "nullable": true
+                ]
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -14214,17 +14176,13 @@
         "type": "object",
         "properties": {
           "status": {
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "open",
               "closed"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           }
         },
@@ -14255,16 +14213,12 @@
         "type": "object",
         "properties": {
           "priority": {
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 1,
-            "maximum": 5,
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maximum": 5
           }
         },
         "required": [
@@ -14297,16 +14251,12 @@
         ],
         "properties": {
           "slug": {
+            "type": [
+              "string",
+              "null"
+            ],
             "pattern": "^[a-z]+$",
-            "maxLength": 6,
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "maxLength": 6
           }
         }
       }
@@ -14423,6 +14373,11 @@
         ],
         "properties": {
           "to": {
+            "$ref": "#/$defs/address"
+          }
+        },
+        "$defs": {
+          "address": {
             "type": "object",
             "properties": {
               "city": {
