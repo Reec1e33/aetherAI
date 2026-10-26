@@ -69,6 +69,34 @@ describe("normalizeOpenApi", () => {
       enum: ["a", null],
     });
   });
+
+  it("maps Gemini proto field names to JSON Schema keywords", () => {
+    expect(
+      normalizeOpenApi({
+        type: "ARRAY",
+        min_items: 1,
+        items: { any_of: [{ type: "STRING", max_length: 4 }, { type: "INTEGER" }] },
+      }),
+    ).toEqual({
+      type: "array",
+      minItems: 1,
+      items: { anyOf: [{ type: "string", maxLength: 4 }, { type: "integer" }] },
+    });
+  });
+
+  it("leaves property names and enum values alone", () => {
+    expect(
+      normalizeOpenApi({
+        type: "OBJECT",
+        properties: { nullable: { type: "BOOLEAN" }, type: { type: "STRING", enum: ["STRING"] } },
+        required: ["nullable", "type"],
+      }),
+    ).toEqual({
+      type: "object",
+      properties: { nullable: { type: "boolean" }, type: { type: "string", enum: ["STRING"] } },
+      required: ["nullable", "type"],
+    });
+  });
 });
 
 describe("evaluateCapture", () => {

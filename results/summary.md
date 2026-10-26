@@ -14,60 +14,60 @@
 | `ai-sdk/openai` | 34/34 | 0 | 0 | ai@7.0.148 @ai-sdk/openai@4.0.99 |
 | `ai-sdk/openai-chat` | 34/34 | 0 | 0 | ai@7.0.148 @ai-sdk/openai@4.0.99 |
 | `ai-sdk/xai` | 34/34 | 0 | 0 | ai@7.0.148 @ai-sdk/xai@5.0.27 |
+| `litellm/groq` | 34/34 | 0 | 0 | litellm==1.106.2 |
+| `litellm/mistral` | 34/34 | 0 | 0 | litellm==1.106.2 |
 | `litellm/openai` | 34/34 | 0 | 0 | litellm==1.106.2 |
+| `litellm/xai` | 34/34 | 0 | 0 | litellm==1.106.2 |
 | `pydantic-ai/anthropic` | 34/34 | 0 | 0 | pydantic-ai-slim==2.59.0 google-genai==2.32.0 openai==3.36.1 anthropic==1.17.0 |
 | `pydantic-ai/openai-chat` | 34/34 | 0 | 1 | pydantic-ai-slim==2.59.0 google-genai==2.32.0 openai==3.36.1 anthropic==1.17.0 |
 | `litellm/anthropic` | 33/34 | 1 | 0 | litellm==1.106.2 |
-| `litellm/groq` | 33/34 | 1 | 2 | litellm==1.106.2 |
-| `litellm/mistral` | 33/34 | 1 | 2 | litellm==1.106.2 |
-| `litellm/xai` | 33/34 | 1 | 2 | litellm==1.106.2 |
-| `litellm/bedrock` | 32/34 | 2 | 2 | litellm==1.106.2 |
+| `litellm/bedrock` | 33/34 | 1 | 0 | litellm==1.106.2 |
 | `pydantic-ai/gemini` | 30/34 | 3 | 0 | pydantic-ai-slim==2.59.0 google-genai==2.32.0 openai==3.36.1 anthropic==1.17.0 |
 | `litellm/gemini` | 18/34 | 13 | 0 | litellm==1.106.2 |
-| `langchain/gemini` | 13/34 | 16 | 6 | langchain-google-genai==4.4.2 langchain-core==1.7.0 google-genai==2.32.0 |
+| `langchain/gemini` | 14/34 | 15 | 6 | langchain-google-genai==4.4.2 langchain-core==1.7.0 google-genai==2.32.0 |
 
-`ai-sdk/anthropic`, `ai-sdk/bedrock`, `ai-sdk/gemini`, `ai-sdk/groq`, `ai-sdk/mistral`, `ai-sdk/openai`, `ai-sdk/openai-chat`, `ai-sdk/xai`, `litellm/openai`, `pydantic-ai/anthropic` passed every schema through without a change that matters.
+`ai-sdk/anthropic`, `ai-sdk/bedrock`, `ai-sdk/gemini`, `ai-sdk/groq`, `ai-sdk/mistral`, `ai-sdk/openai`, `ai-sdk/openai-chat`, `ai-sdk/xai`, `litellm/groq`, `litellm/mistral`, `litellm/openai`, `litellm/xai`, `pydantic-ai/anthropic` passed every schema through without a change that matters.
 
 ## Constraint by constraint
 
 Only targets that lost or changed something are shown.
 
-| Fixture | Keyword | `pydantic-ai/openai-chat` | `litellm/anthropic` | `litellm/groq` | `litellm/mistral` | `litellm/xai` | `litellm/bedrock` | `pydantic-ai/gemini` | `litellm/gemini` | `langchain/gemini` |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| additional-properties-false | `additionalProperties` | kept | kept | **dropped** | **dropped** | **dropped** | **dropped** | kept | **dropped** | **dropped** |
-| allof-range | `allOf` | kept | kept | kept† | kept† | kept† | kept† | kept | **dropped** | **dropped** |
-| anyof-objects | `anyOf` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| array-items-enum | `enum` | kept | kept | kept | kept | kept | kept | kept | kept | kept |
-| array-length | `minItems` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| array-length | `maxItems` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| array-object-enum | `enum` | kept | kept | kept | kept | kept | kept | kept | kept | kept |
-| array-unique | `uniqueItems` | kept | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** |
-| const | `const` | kept | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** |
-| dependent-required | `dependentRequired` | kept | **dropped** | kept | kept | kept | **dropped** | kept | **dropped** | **dropped** |
-| enum-string | `enum` | kept | kept | kept | kept | kept | kept | kept | kept | kept |
-| exclusive-range | `exclusiveMinimum` | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** | **dropped** |
-| exclusive-range | `exclusiveMaximum` | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** | **dropped** |
-| format-date-time | `format` | kept | kept | kept | kept | kept | kept | **dropped** | kept | **dropped** |
-| format-email | `format` | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** | **dropped** |
-| integer-type | `type` | kept | kept | kept | kept | kept | kept | kept | kept | kept |
-| min-properties | `minProperties` | kept† | kept | kept | kept | kept | kept | kept | kept | kept† |
-| multiple-of | `multipleOf` | kept | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** |
-| not-enum | `not` | kept | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** |
-| nullable-anyof-enum | `enum` | kept | kept | kept† | kept† | kept† | kept† | kept | kept | kept |
-| nullable-type-array-enum | `enum` | kept | kept | kept | kept | kept | kept | kept | **dropped** | kept |
-| nullable-type-array-range | `minimum` | kept | kept | kept | kept | kept | kept | kept | **dropped** | kept† |
-| nullable-type-array-range | `maximum` | kept | kept | kept | kept | kept | kept | kept | **dropped** | kept† |
-| nullable-type-array-string | `pattern` | kept | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** |
-| nullable-type-array-string | `maxLength` | kept | kept | kept | kept | kept | kept | kept | **dropped** | **dropped** |
-| number-range | `minimum` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| number-range | `maximum` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| oneof-scalars | `oneOf` | kept | kept | kept | kept | kept | kept | kept | **dropped** | kept† |
-| pattern | `pattern` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| ref-defs | `required` | kept | kept | kept | kept | kept | kept | kept | kept | kept† |
-| required-nested | `required` | kept | kept | kept | kept | kept | kept | kept | kept | kept† |
-| required-top-level | `required` | kept | kept | kept | kept | kept | kept | kept | kept | kept |
-| string-length | `minLength` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
-| string-length | `maxLength` | kept | kept | kept | kept | kept | kept | kept | kept | **dropped** |
+| Fixture | Keyword | `pydantic-ai/openai-chat` | `litellm/anthropic` | `litellm/bedrock` | `pydantic-ai/gemini` | `litellm/gemini` | `langchain/gemini` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| additional-properties-false | `additionalProperties` | kept | kept | kept | kept | **dropped** | **dropped** |
+| allof-range | `allOf` | kept | kept | kept | kept | **dropped** | **dropped** |
+| anyof-objects | `anyOf` | kept | kept | kept | kept | kept | kept |
+| array-items-enum | `enum` | kept | kept | kept | kept | kept | kept |
+| array-length | `minItems` | kept | kept | kept | kept | kept | **dropped** |
+| array-length | `maxItems` | kept | kept | kept | kept | kept | **dropped** |
+| array-object-enum | `enum` | kept | kept | kept | kept | kept | kept |
+| array-unique | `uniqueItems` | kept | kept | kept | kept | **dropped** | **dropped** |
+| const | `const` | kept | kept | kept | kept | **dropped** | **dropped** |
+| dependent-required | `dependentRequired` | kept | **dropped** | **dropped** | kept | **dropped** | **dropped** |
+| enum-string | `enum` | kept | kept | kept | kept | kept | kept |
+| exclusive-range | `exclusiveMinimum` | kept | kept | kept | **dropped** | **dropped** | **dropped** |
+| exclusive-range | `exclusiveMaximum` | kept | kept | kept | **dropped** | **dropped** | **dropped** |
+| format-date-time | `format` | kept | kept | kept | **dropped** | kept | **dropped** |
+| format-email | `format` | kept | kept | kept | **dropped** | **dropped** | **dropped** |
+| integer-type | `type` | kept | kept | kept | kept | kept | kept |
+| min-properties | `minProperties` | kept† | kept | kept | kept | kept | kept† |
+| multiple-of | `multipleOf` | kept | kept | kept | kept | **dropped** | **dropped** |
+| not-enum | `not` | kept | kept | kept | kept | **dropped** | **dropped** |
+| nullable-anyof-enum | `enum` | kept | kept | kept | kept | kept | kept |
+| nullable-type-array-enum | `enum` | kept | kept | kept | kept | **dropped** | kept |
+| nullable-type-array-range | `minimum` | kept | kept | kept | kept | **dropped** | kept† |
+| nullable-type-array-range | `maximum` | kept | kept | kept | kept | **dropped** | kept† |
+| nullable-type-array-string | `pattern` | kept | kept | kept | kept | **dropped** | **dropped** |
+| nullable-type-array-string | `maxLength` | kept | kept | kept | kept | **dropped** | **dropped** |
+| number-range | `minimum` | kept | kept | kept | kept | kept | **dropped** |
+| number-range | `maximum` | kept | kept | kept | kept | kept | **dropped** |
+| oneof-scalars | `oneOf` | kept | kept | kept | kept | **dropped** | kept† |
+| pattern | `pattern` | kept | kept | kept | kept | kept | **dropped** |
+| ref-defs | `required` | kept | kept | kept | kept | kept | kept† |
+| required-nested | `required` | kept | kept | kept | kept | kept | kept† |
+| required-top-level | `required` | kept | kept | kept | kept | kept | kept |
+| string-length | `minLength` | kept | kept | kept | kept | kept | **dropped** |
+| string-length | `maxLength` | kept | kept | kept | kept | kept | **dropped** |
 
 † The constraint still rejects the bad value, but the outgoing schema also rejects a valid value. See below.
 
@@ -84,13 +84,5 @@ These schemas got stricter or broke, not weaker. A model that obeys them cannot 
 | `langchain/gemini` | oneof-scalars | `{"label":4}` |
 | `langchain/gemini` | ref-defs | `{"to":{"city":"Flint"}}` |
 | `langchain/gemini` | required-nested | `{"address":{"city":"Detroit"}}` |
-| `litellm/bedrock` | allof-range | `{"volume":50}` |
-| `litellm/bedrock` | nullable-anyof-enum | `{"status":null}` |
-| `litellm/mistral` | allof-range | `{"volume":50}` |
-| `litellm/mistral` | nullable-anyof-enum | `{"status":null}` |
-| `litellm/groq` | allof-range | `{"volume":50}` |
-| `litellm/groq` | nullable-anyof-enum | `{"status":null}` |
-| `litellm/xai` | allof-range | `{"volume":50}` |
-| `litellm/xai` | nullable-anyof-enum | `{"status":null}` |
 | `pydantic-ai/openai-chat` | min-properties | `{"changes":{"theme":"dark"}}` |
 

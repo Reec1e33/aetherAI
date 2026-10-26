@@ -1,36 +1,39 @@
 # aether-census
 
+[![CI](https://github.com/Reec1e33/aether-census/actions/workflows/ci.yml/badge.svg)](https://github.com/Reec1e33/aether-census/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Does your tool schema survive the trip to the model?
+
+[![Same 28 tool schemas, sent to Gemini through four libraries. Constraints still enforced, of 34: AI SDK 34, Pydantic AI 30, LiteLLM 18, LangChain 14.](docs/og.png)](https://reec1e33.github.io/aether-census/deck.html)
 
 You write one JSON Schema for a tool, then hand it to an SDK or gateway that turns it into a request for OpenAI, Anthropic, Gemini, Bedrock, and so on. Somewhere in that translation, parts of the schema can quietly disappear. Nothing errors, nothing gets logged, and nothing on the provider side stops the model from sending arguments your schema was supposed to forbid.
 
 This repo measures that. It runs 28 tool schemas through 19 library + provider combinations, catches each request before it leaves the machine, and checks whether the schema that went out still enforces what the original did.
 
-## What I found (first run, 2026-10-22)
+## What I found (first run, October 2026)
 
 | Library → provider | Constraints still enforced | Notes |
 | --- | --- | --- |
 | AI SDK → all 8 providers | 34 / 34 | Sends the schema through unchanged, including to Gemini (`parametersJsonSchema`). |
-| LiteLLM → OpenAI | 34 / 34 | |
+| LiteLLM → OpenAI, Groq, Mistral, xAI | 34 / 34 | |
 | Pydantic AI → Anthropic | 34 / 34 | |
 | Pydantic AI → OpenAI | 34 / 34 | But one schema becomes impossible to satisfy (below). |
-| LiteLLM → Anthropic | 33 / 34 | Drops `dependentRequired`. |
-| LiteLLM → Groq, Mistral, xAI | 33 / 34 | Drops `additionalProperties: false`. Two schemas get broken (below). |
-| LiteLLM → Bedrock | 32 / 34 | Same as above, plus `dependentRequired`. |
+| LiteLLM → Anthropic, Bedrock | 33 / 34 | Drops `dependentRequired`. |
 | Pydantic AI → Gemini | 30 / 34 | Drops exclusive bounds; moves `format` into the description as a hint. |
-| LiteLLM → Gemini | 18 / 34 | Drops `const`, `multipleOf`, `uniqueItems`, `not`, `oneOf`, `allOf`, `additionalProperties`, and every constraint on a nullable field written as `["string", "null"]`. |
-| LangChain → Gemini | 13 / 34 | Drops `pattern`, `minimum`/`maximum`, `minLength`/`maxLength`, `minItems`/`maxItems`, `format`, `anyOf`, and more. Six schemas also change shape (below). |
+| LiteLLM → Gemini | 18 / 34 | Drops `const`, `multipleOf`, `uniqueItems`, `not`, `oneOf`, `allOf`, `additionalProperties`, `dependentRequired`, exclusive bounds, `format: email`, and every constraint on a nullable field written as a type array (`["string", "null"]`). |
+| LangChain → Gemini | 14 / 34 | Drops `pattern`, `minimum`/`maximum`, `minLength`/`maxLength`, `minItems`/`maxItems`, `format`, `const`, and more. Six schemas also change shape (below). |
 
-"Constraints still enforced" means: for each of 34 test cases, a value the original schema rejects is still rejected by the schema that was actually sent. Full table, per constraint: [`results/summary.md`](results/summary.md). There's also a short deck with the results in [`docs/deck.html`](docs/deck.html) (download and open it in a browser); its charts are filled from `results/results.json` by `harness/deck_data.py`.
+"Constraints still enforced" means: for each of 34 test cases, a value the original schema rejects is still rejected by the schema that was actually sent. Full table, per constraint: [`results/summary.md`](results/summary.md). There's also a [short deck with the results](https://reec1e33.github.io/aether-census/deck.html) (source: [`docs/deck.html`](docs/deck.html)); its charts are filled from `results/results.json` by `harness/deck_data.py`.
 
 Dropping is the obvious failure. The sneakier one is a schema that comes out *stricter or broken*, so a model that follows it can't send a value you'd accept:
 
-- **LiteLLM → Groq / Mistral / xAI / Bedrock** puts `"type": "object"` inside every `allOf` branch. An integer field with `allOf: [{minimum: 0}, {maximum: 100}]` becomes a field no value can satisfy.
-- **Same paths** turn `anyOf: [{...}, {type: "null"}]` into `nullable: true`. That's OpenAPI, not JSON Schema, so `null` stops being valid.
-- **Pydantic AI → OpenAI** adds `additionalProperties: false` to a free-form object that has `minProperties: 1`. Nothing can satisfy that.
-- **LangChain → Gemini** turns `oneOf`, free-form objects, and nullable type arrays into `STRING`, and marks optional nested fields as required.
+- **Pydantic AI → OpenAI** adds `properties: {}` and `additionalProperties: false` to a free-form object that has `minProperties: 1`. Nothing can satisfy that.
+- **LangChain → Gemini** turns `oneOf`, free-form objects, and nullable type arrays into `STRING`, and marks optional nested fields as required. A model that follows it has to make up a value for a field you left optional.
 
-Some of this is already reported upstream ([LiteLLM #43325](https://github.com/BerriAI/litellm/issues/43325), [LiteLLM #41913](https://github.com/BerriAI/litellm/issues/41913), [langchain-google #1725](https://github.com/langchain-ai/langchain-google/issues/1725)). For the `allOf`, `nullable`, `minProperties`, and `STRING` cases I couldn't find an existing issue.
+One more that the census ran into by accident: **LiteLLM's Gemini path rewrites the tool definition you pass in, in place** ([LiteLLM #46921](https://github.com/BerriAI/litellm/issues/46921)). If you then send the same dict to another provider, for example as a Router fallback, that provider gets the Gemini version: `"type": "object"` inside each `allOf` branch, `nullable: true` in place of a `null` branch, and no `additionalProperties`. It got into the first version of these results too (see [Corrections](#corrections)).
+
+Most of this is already reported upstream: [LiteLLM #43325](https://github.com/BerriAI/litellm/issues/43325), [#41913](https://github.com/BerriAI/litellm/issues/41913) and [#46921](https://github.com/BerriAI/litellm/issues/46921); [langchain-google #1725](https://github.com/langchain-ai/langchain-google/issues/1725), [#1998](https://github.com/langchain-ai/langchain-google/issues/1998) and [#1622](https://github.com/langchain-ai/langchain-google/issues/1622). I couldn't find an existing issue for two cases: Pydantic AI's `minProperties` + `additionalProperties: false` (closest: [pydantic-ai #5417](https://github.com/pydantic/pydantic-ai/issues/5417), closed), and LangChain turning nullable type arrays into `STRING`.
 
 ## How it works
 
@@ -60,6 +63,10 @@ pnpm test
 ## Contributing
 
 The most useful thing is a fixture from a real failure you've hit. A new library to capture is next. See [CONTRIBUTING.md](CONTRIBUTING.md). Notes and open questions are in [docs/research-plan.md](docs/research-plan.md).
+
+## Corrections
+
+**2026-10-26.** The first version of these results (2026-10-22) said LiteLLM broke `allOf` and `nullable` schemas and dropped `additionalProperties: false` for Groq, Mistral, xAI, and Bedrock. It doesn't. The harness reused one copy of each fixture across targets, and LiteLLM's Gemini path, which ran first, rewrote it in place, so every later target got the Gemini version. Each target now gets a fresh copy. The same pass fixed the judge, which didn't read the `any_of` spelling that LangChain sends to Gemini; LangChain → Gemini moves from 13 to 14.
 
 ## Background
 
