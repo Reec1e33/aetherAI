@@ -35,7 +35,9 @@ The first run covers the **library layer only**: what the SDK or gateway puts on
 - 19 targets: the AI SDK with 8 providers, LiteLLM with 7, Pydantic AI with 3, LangChain's Google package.
 - Requests are caught before they leave the machine. Python sockets are blocked outright after an early version of the harness let a few requests through to OpenAI and Google with a fake key (they were rejected, and no real key or data was involved, but "probably offline" isn't good enough).
 - Each library gets its own virtualenv with locked dependencies. LiteLLM and Pydantic AI can't share one (different major versions of `openai`), and Pydantic AI 2.59 breaks with `anthropic` 2.x ([pydantic-ai #10923](https://github.com/pydantic/pydantic-ai/issues/10923)), so that env pins `anthropic==1.17.0`.
-- Each target gets a fresh copy of each fixture. The first version didn't, and LiteLLM's Gemini path rewrites the tool dict in place ([LiteLLM #46921](https://github.com/BerriAI/litellm/issues/46921)), so the LiteLLM targets that ran after Gemini were judged on the Gemini version. Found by a fact-check pass on 2026-10-26 and corrected; see the README's Corrections section. A test that runs each target alone would have caught it, and the Python captures aren't re-run in CI yet.
+- Each target gets a fresh copy of each fixture. The first version didn't, and LiteLLM's Gemini path rewrites the tool dict in place ([LiteLLM #46921](https://github.com/BerriAI/litellm/issues/46921)), so the LiteLLM targets that ran after Gemini were judged on the Gemini version. Fixed on 2026-10-26 (see the README's Corrections section). CI now re-runs every Python capture in reverse target order and fails if any request changes, which catches this kind of leak.
+- Model names. Each path also runs with two or three more models per provider (72 library and model pairs). Only LiteLLM → Bedrock depends on the model: it keeps `additionalProperties: false` for Claude Sonnet 4.5 and drops it for Claude Sonnet 5.5, Nova Pro and Mistral Large. See [`results/models/by-model.md`](../results/models/by-model.md).
+- CI runs the whole census from a clean checkout on every push. A weekly job runs it on the newest release of each library and fails if a score changes, so the committed results can't go stale silently.
 
 Results are in [`results/summary.md`](../results/summary.md) and summarized in the README. The short version: the AI SDK passes schemas through untouched; every library that *converts* schemas for Gemini loses a lot (LangChain keeps 14 of 34, LiteLLM 18); and some paths make schemas stricter or unsatisfiable, which is harder to notice than a drop.
 
@@ -51,5 +53,5 @@ Results are in [`results/summary.md`](../results/summary.md) and summarized in t
 
 - How many samples per cell does the wave-2 behavioral check need before a difference means anything?
 - Is a library dropping a keyword the provider can't handle a bug, or the right call? Probably depends on whether it tells you. Worth tracking warnings separately.
-- Some libraries choose a code path by model name. One model per provider is a known gap.
+- Why does LiteLLM → Bedrock keep `additionalProperties: false` for one Claude model and not another? Probably per-model metadata in LiteLLM; worth tracing before filing anything.
 - Provider terms of service for wave 2 probing. Should be fine at low volume, but check first.

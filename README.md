@@ -46,19 +46,22 @@ Most of this is already reported upstream: [LiteLLM #43325](https://github.com/B
 - It measures what the **library sends**. A schema that goes out intact can still be ignored or rejected by the provider; that's the next step and needs API keys.
 - Some drops are the library working around a provider that doesn't support a keyword. That's still worth knowing, because nothing tells you it happened (LangChain does log a warning for some keywords).
 - `format` is only an annotation in JSON Schema 2020-12 unless a validator opts in. I count it because some providers enforce formats in strict mode.
-- One model ID per provider. Some libraries pick a different code path by model name.
+- The headline table uses one model per provider. Every path was also re-run with two or three more models each, including current ones (GPT-5.2, Claude Sonnet 5.5 and Opus 5.5, Gemini 3.x): 72 library and model pairs in all. Only one score moved: LiteLLM → Bedrock keeps `additionalProperties: false` for Claude Sonnet 4.5 and drops it for Claude Sonnet 5.5, Nova Pro, and Mistral Large. Per model: [`results/models/by-model.md`](results/models/by-model.md).
 
 ## Run it yourself
 
-Needs Node 22+, pnpm, and Python 3.12+.
+Needs Node 22+, pnpm, and Python (CI uses 3.14).
 
 ```sh
 pnpm install
-./harness/run.sh        # captures everything again, then writes results/
+./harness/run.sh          # captures everything again, then writes results/
+./harness/run.sh --check  # same, plus a check that target order changes nothing
 pnpm test
 ```
 
-`run.sh` builds one virtualenv per Python library from the lockfiles in [`harness/requirements/`](harness/requirements/), because LiteLLM and Pydantic AI need different major versions of `openai`. CI re-captures the AI SDK requests on every push and fails if the results change.
+`run.sh` builds one virtualenv per Python library from the lockfiles in [`harness/requirements/`](harness/requirements/), because LiteLLM and Pydantic AI need different major versions of `openai`. It takes about half a minute.
+
+You don't have to run it to check it. On every push, [CI](https://github.com/Reec1e33/aether-census/actions/workflows/ci.yml) runs `./harness/run.sh --check` from a clean checkout: every library and model, sockets blocked, then the Python captures again in reverse target order. It fails if a single request or result differs from what's committed. A [weekly job](https://github.com/Reec1e33/aether-census/actions/workflows/latest.yml) does the same with the newest release of each library and fails if any score changes.
 
 ## Contributing
 
@@ -66,7 +69,7 @@ The most useful thing is a fixture from a real failure you've hit. A new library
 
 ## Corrections
 
-**2026-10-26.** The first version of these results (2026-10-22) said LiteLLM broke `allOf` and `nullable` schemas and dropped `additionalProperties: false` for Groq, Mistral, xAI, and Bedrock. It doesn't. The harness reused one copy of each fixture across targets, and LiteLLM's Gemini path, which ran first, rewrote it in place, so every later target got the Gemini version. Each target now gets a fresh copy. The same pass fixed the judge, which didn't read the `any_of` spelling that LangChain sends to Gemini; LangChain → Gemini moves from 13 to 14.
+**2026-10-26.** The first version of these results (2026-10-22) said LiteLLM broke `allOf` and `nullable` schemas and dropped `additionalProperties: false` for Groq, Mistral, xAI, and Bedrock. It doesn't. The harness reused one copy of each fixture across targets, and LiteLLM's Gemini path, which ran first, rewrote it in place, so every later target got the Gemini version. Each target now gets a fresh copy, and CI re-runs the Python captures in reverse target order to catch any leak like this. The judge also had a bug: it didn't read the `any_of` spelling that LangChain sends to Gemini. Fixing it moves LangChain → Gemini from 13 to 14.
 
 ## Background
 

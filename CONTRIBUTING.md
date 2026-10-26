@@ -31,7 +31,7 @@ Please don't paste schemas from private codebases.
 
 ## Adding a library
 
-Captures live in `src/capture/` (TypeScript) and `harness/capture.py` (Python). A new target needs to build a real request for each fixture without touching the network, and record it in the shared capture format (`src/capture/types.ts`). Python libraries get their own lockfile in `harness/requirements/`. Open an issue first so we can agree on which code path and model ID to use.
+Captures live in `src/capture/` (TypeScript) and `harness/capture.py` (Python). A new target needs to build a real request for each fixture without touching the network, and record it in the shared capture format (`src/capture/types.ts`). Python libraries get their own lockfile in `harness/requirements/`. Each target lists its models: the first is the headline model, the rest run with `--all-models`. Open an issue first so we can agree on which code path and models to use.
 
 ## Bigger changes
 
@@ -40,7 +40,7 @@ Open an issue first for anything beyond a fixture or a small fix: new endpoint a
 ## Pull requests
 
 - One change per PR, with tests.
-- CI runs lint, typecheck, and tests. It never makes paid API calls.
+- CI runs lint, typecheck, tests, and the whole census offline (`./harness/run.sh --check`). If your change moves a result, commit the new captures and results with it. CI never makes paid API calls.
 - Live probes run on your machine with your own keys. Commit the run config and the raw results, never the keys.
 - Results you don't like get reported too. A run doesn't get dropped because it came out "wrong".
 

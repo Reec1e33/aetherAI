@@ -321,7 +321,7 @@ table { border-collapse: collapse; font-family: var(--sans); font-size: 0.78rem;
         <li><span><strong>Capture.</strong> Each library builds a real request. A custom <code>fetch</code> (TypeScript) or a replaced HTTP transport with sockets blocked (Python) catches it. No API keys, no network.</span></li>
         <li><span><strong>Judge.</strong> Find the tool schema in the request body, translate Gemini's OpenAPI dialect where needed, and run the examples through a JSON Schema validator.</span></li>
       </ol>
-      <p class="muted">A constraint counts as kept when the outgoing schema still rejects the value that breaks it. Everything is reproducible from the repo with one script, and CI re-runs part of it on every push.</p>
+      <p class="muted">A constraint counts as kept when the outgoing schema still rejects the value that breaks it. Everything is reproducible from the repo with one script, and CI re-runs all of it from scratch on every push.</p>
     </section>
 
     <section class="slide" id="results" aria-labelledby="t-results">
@@ -405,7 +405,7 @@ table { border-collapse: collapse; font-family: var(--sans); font-size: 0.78rem;
       <ul class="points">
         <li>It tests the library layer. A schema that goes out intact can still be ignored by the provider. That needs live calls and API keys, and it's the next wave.</li>
         <li>Some drops are deliberate workarounds for keywords a provider rejects. That can be the right call, but the caller isn't told.</li>
-        <li>One model per provider. Some libraries pick a different code path by model name.</li>
+        <li>The charts use one model per provider. A sweep over 72 library and model pairs, including GPT-5.2, Claude 5.5 and Gemini 3.x, changed only one score: LiteLLM → Bedrock drops <code>additionalProperties: false</code> for every model tried except Claude Sonnet 4.5.</li>
         <li><code>format</code> counts as a constraint here, although JSON Schema treats it as an annotation unless a validator opts in.</li>
       </ul>
       <p class="muted">Corrected 26 October 2026. The first version reported that LiteLLM broke <code>allOf</code> and <code>nullable</code> schemas for Groq, Mistral, xAI and Bedrock. That came from a harness bug: every target reused one copy of each schema, and LiteLLM's Gemini path had already rewritten it. LangChain → Gemini also moved from 13 to 14, after a fix to how the judge reads Gemini's <code>any_of</code>.</p>
