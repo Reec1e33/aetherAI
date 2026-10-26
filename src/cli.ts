@@ -11,7 +11,9 @@ const USAGE = `Usage: census <command>
 
 Commands:
   fixtures validate [dir]          Check fixture files (default dir: fixtures)
-  capture ai-sdk <out.jsonl>       Capture AI SDK requests for every fixture
+  capture ai-sdk <out.jsonl> [--all-models]
+                                   Capture AI SDK requests for every fixture. With
+                                   --all-models, also try each extra model per provider
   evaluate <captures-dir> <out-dir> Judge captured requests, write results.json and summary.md
   help                             Show this message`;
 
@@ -33,7 +35,8 @@ async function main(argv: string[]): Promise<number> {
     return errors.length === 0 ? 0 : 1;
   }
   if (command === "capture" && sub === "ai-sdk" && rest[0]) {
-    const captures = await captureAiSdk(await fixturesOrExit());
+    const allModels = rest.includes("--all-models");
+    const captures = await captureAiSdk(await fixturesOrExit(), { allModels });
     await writeFile(rest[0], `${captures.map((c) => JSON.stringify(c)).join("\n")}\n`);
     console.log(`${captures.length} captures written to ${rest[0]}`);
     return 0;

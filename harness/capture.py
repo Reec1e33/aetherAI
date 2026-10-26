@@ -73,45 +73,76 @@ def versions(*packages: str) -> str:
     return " ".join(f"{p}=={importlib.metadata.version(p)}" for p in packages)
 
 
+# --- Targets -----------------------------------------------------------------
+#
+# Each target is (provider, model names, make), where make(name) returns a function
+# that sends one fixture. The first name is the headline model; the others are only
+# used with --all-models, to check whether the library changes the schema by model.
+
+Send = Callable[[dict], None]
+TargetSpec = tuple[str, list[str], Callable[[str], Send]]
+
+
 # --- LiteLLM -----------------------------------------------------------------
 
 LITELLM_MODELS = {
-    "openai": "openai/gpt-5",
-    "anthropic": "anthropic/claude-sonnet-4-5",
-    "gemini": "gemini/gemini-2.5-pro",
-    "bedrock": "bedrock/converse/anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "mistral": "mistral/mistral-large-latest",
-    "groq": "groq/openai/gpt-oss-120b",
-    "xai": "xai/grok-4",
+    "openai": ("openai/", ["gpt-5", "gpt-4.1", "o3", "gpt-5.2"]),
+    "anthropic": ("anthropic/", ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-sonnet-5-5", "claude-opus-5-5"]),
+    "gemini": ("gemini/", ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3.1-pro-preview", "gemini-3.8-flash"]),
+    "bedrock": (
+        "bedrock/converse/",
+        [
+            "anthropic.claude-sonnet-4-5-20250929-v1:0",
+            "anthropic.claude-sonnet-5-5",
+            "amazon.nova-pro-v1:0",
+            "mistral.mistral-large-2407-v1:0",
+        ],
+    ),
+    "mistral": ("mistral/", ["mistral-large-latest", "mistral-small-latest", "codestral-latest", "magistral-medium-latest"]),
+    "groq": ("groq/", ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]),
+    "xai": ("xai/", ["grok-4", "grok-4.20", "grok-4.7"]),
 }
 
 
-def litellm_targets() -> list[tuple[str, str, Callable[[dict], None]]]:
+def litellm_targets() -> list[TargetSpec]:
     import litellm
 
-    def make(model: str) -> Callable[[dict], None]:
-        def send(fx: dict) -> None:
-            litellm.completion(
-                model=model,
-                messages=[{"role": "user", "content": PROMPT}],
-                tools=[{"type": "function", "function": fx["tool"]}],
-                api_key=KEY,
-                aws_access_key_id=KEY,
-                aws_secret_access_key=KEY,
-                aws_region_name="us-east-1",
-                num_retries=0,
-                max_retries=0,
-            )
+    def make_for(prefix: str) -> Callable[[str], Send]:
+        def make(name: str) -> Send:
+            def send(fx: dict) -> None:
+                litellm.completion(
+                    model=prefix + name,
+                    messages=[{"role": "user", "content": PROMPT}],
+                    tools=[{"type": "function", "function": fx["tool"]}],
+                    api_key=KEY,
+                    aws_access_key_id=KEY,
+                    aws_secret_access_key=KEY,
+                    aws_region_name="us-east-1",
+                    num_retries=0,
+                    max_retries=0,
+                )
 
-        return send
+            return send
 
-    return [(p, m, make(m)) for p, m in LITELLM_MODELS.items()]
+        return make
+
+    return [(p, names, make_for(prefix)) for p, (prefix, names) in LITELLM_MODELS.items()]
+
+
+def litellm_model_field(provider: str, name: str) -> str:
+    return LITELLM_MODELS[provider][0] + name
 
 
 # --- Pydantic AI -------------------------------------------------------------
 
+PYDANTIC_AI_MODELS = {
+    "openai-chat": ["gpt-5", "gpt-4.1", "o3", "gpt-5.2"],
+    "anthropic": ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-sonnet-5-5", "claude-opus-5-5"],
+    "gemini": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3.1-pro-preview", "gemini-3.8-flash"],
+}
 
-def pydantic_ai_targets() -> list[tuple[str, str, Callable[[dict], None]]]:
+
+def pydantic_ai_targets() -> list[TargetSpec]:
     from pydantic_ai import Agent, Tool
     from pydantic_ai.models.anthropic import AnthropicModel
     from pydantic_ai.models.google import GoogleModel
@@ -120,32 +151,44 @@ def pydantic_ai_targets() -> list[tuple[str, str, Callable[[dict], None]]]:
     from pydantic_ai.providers.google import GoogleProvider
     from pydantic_ai.providers.openai import OpenAIProvider
 
-    def make(build_model: Callable[[], Any]) -> Callable[[dict], None]:
-        def send(fx: dict) -> None:
-            t = fx["tool"]
-            tool = Tool.from_schema(lambda **_: None, name=t["name"], description=t["description"], json_schema=t["parameters"])
-            Agent(build_model(), tools=[tool]).run_sync(PROMPT)
+    builders: dict[str, Callable[[str], Any]] = {
+        "openai-chat": lambda m: OpenAIChatModel(m, provider=OpenAIProvider(api_key=KEY)),
+        "anthropic": lambda m: AnthropicModel(m, provider=AnthropicProvider(api_key=KEY)),
+        "gemini": lambda m: GoogleModel(m, provider=GoogleProvider(api_key=KEY)),
+    }
 
-        return send
+    def make_for(build_model: Callable[[str], Any]) -> Callable[[str], Send]:
+        def make(name: str) -> Send:
+            def send(fx: dict) -> None:
+                t = fx["tool"]
+                tool = Tool.from_schema(lambda **_: None, name=t["name"], description=t["description"], json_schema=t["parameters"])
+                Agent(build_model(name), tools=[tool]).run_sync(PROMPT)
 
-    return [
-        ("openai-chat", "gpt-5", make(lambda: OpenAIChatModel("gpt-5", provider=OpenAIProvider(api_key=KEY)))),
-        ("anthropic", "claude-sonnet-4-5", make(lambda: AnthropicModel("claude-sonnet-4-5", provider=AnthropicProvider(api_key=KEY)))),
-        ("gemini", "gemini-2.5-pro", make(lambda: GoogleModel("gemini-2.5-pro", provider=GoogleProvider(api_key=KEY)))),
-    ]
+            return send
+
+        return make
+
+    return [(p, PYDANTIC_AI_MODELS[p], make_for(b)) for p, b in builders.items()]
 
 
 # --- LangChain ---------------------------------------------------------------
 
+LANGCHAIN_MODELS = {
+    "gemini": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3.1-pro-preview", "gemini-3.8-flash"],
+}
 
-def langchain_targets() -> list[tuple[str, str, Callable[[dict], None]]]:
+
+def langchain_targets() -> list[TargetSpec]:
     from langchain_google_genai import ChatGoogleGenerativeAI
 
-    def send(fx: dict) -> None:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", google_api_key=KEY, max_retries=0)
-        llm.bind_tools([{"type": "function", "function": fx["tool"]}]).invoke(PROMPT)
+    def make(name: str) -> Send:
+        def send(fx: dict) -> None:
+            llm = ChatGoogleGenerativeAI(model=name, google_api_key=KEY, max_retries=0)
+            llm.bind_tools([{"type": "function", "function": fx["tool"]}]).invoke(PROMPT)
 
-    return [("gemini", "gemini-2.5-pro", send)]
+        return send
+
+    return [("gemini", LANGCHAIN_MODELS["gemini"], make)]
 
 
 LIBRARIES = {
@@ -155,20 +198,30 @@ LIBRARIES = {
 }
 
 
-def capture(library: str, out_path: Path) -> None:
+def capture(library: str, out_path: Path, all_models: bool = False, reverse: bool = False) -> None:
+    """Capture every fixture for every target of one library.
+
+    all_models: also run the extra models, with the model name in the target id.
+    reverse: run the targets in reverse order. The output must not change (apart
+    from line order); CI checks this, so state can't leak from one target to the next.
+    """
     block_network()
     record_http()
     build, packages = LIBRARIES[library]
     version = versions(*packages)
     fixtures = [json.loads(p.read_text()) for p in sorted(FIXTURES.glob("*.json"))]
+    runs = [(provider, name, make) for provider, names, make in build() for name in (names if all_models else names[:1])]
+    if reverse:
+        runs.reverse()
     out = out_path.open("w")
-    for provider, model, send in build():
+    for provider, name, make in runs:
+        send = make(name)
         target = {
-            "id": f"{library}/{provider}",
+            "id": f"{library}/{provider}@{name}" if all_models else f"{library}/{provider}",
             "library": library,
             "libraryVersion": version,
             "provider": provider,
-            "model": model,
+            "model": litellm_model_field(provider, name) if library == "litellm" else name,
         }
         for fx in fixtures:
             SENT.clear()
@@ -190,6 +243,8 @@ def capture(library: str, out_path: Path) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3 or sys.argv[1] not in LIBRARIES:
-        sys.exit(f"usage: capture.py {{{','.join(LIBRARIES)}}} OUT.jsonl")
-    capture(sys.argv[1], Path(sys.argv[2]))
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    if len(args) != 2 or args[0] not in LIBRARIES or not flags <= {"--all-models", "--reverse"}:
+        sys.exit(f"usage: capture.py {{{','.join(LIBRARIES)}}} OUT.jsonl [--all-models] [--reverse]")
+    capture(args[0], Path(args[1]), all_models="--all-models" in flags, reverse="--reverse" in flags)
